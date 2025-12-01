@@ -1,0 +1,2760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forest Cover Type Prediction System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --forest-green: #0f5132;
+            --emerald: #2ecc71;
+            --white: #ffffff;
+            --light-grey: #f4f4f4;
+            --dark-grey: #333333;
+            --transition: all 0.3s ease;
+            --border-radius: 15px;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+        }
+
+        .dark-mode {
+            --forest-green: #1a7a4e;
+            --emerald: #27ae60;
+            --white: #1e1e1e;
+            --light-grey: #2d2d2d;
+            --dark-grey: #f0f0f0;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            --glass-bg: rgba(30, 30, 30, 0.85);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-grey);
+            color: var(--dark-grey);
+            transition: var(--transition);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--forest-green);
+            margin-bottom: 1rem;
+        }
+
+        .dark-mode h1, .dark-mode h2, .dark-mode h3, .dark-mode h4 {
+            color: var(--emerald);
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--forest-green);
+            transition: var(--transition);
+        }
+
+        .dark-mode a {
+            color: var(--emerald);
+        }
+
+        a:hover {
+            color: var(--emerald);
+        }
+
+        .dark-mode a:hover {
+            color: #4cd964;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Header & Navigation */
+        header {
+            background-color: var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .dark-mode header {
+            background-color: #252525;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--forest-green);
+        }
+
+        .dark-mode .logo {
+            color: var(--emerald);
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--emerald);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--forest-green);
+            transition: var(--transition);
+        }
+
+        .dark-mode .theme-toggle {
+            color: var(--emerald);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--forest-green);
+        }
+
+        .dark-mode .mobile-menu-btn {
+            color: var(--emerald);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, rgba(15, 81, 50, 0.9) 0%, rgba(46, 204, 113, 0.7) 100%), url('https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') center/cover no-repeat;
+            color: var(--white);
+            padding: 8rem 0 6rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--white);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: var(--transition);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--emerald);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.6);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--white);
+            border: 2px solid var(--white);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .features {
+            padding: 5rem 0;
+            background-color: var(--white);
+        }
+
+        .dark-mode .features {
+            background-color: #252525;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: var(--emerald);
+            border-radius: 2px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background-color: var(--light-grey);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dark-mode .feature-card {
+            background-color: #2d2d2d;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card i {
+            font-size: 3rem;
+            color: var(--emerald);
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* About Page */
+        .about {
+            padding: 5rem 0;
+            background-color: var(--light-grey);
+        }
+
+        .dark-mode .about {
+            background-color: #1e1e1e;
+        }
+
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background-color: var(--emerald);
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+            border-radius: 10px;
+        }
+
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            width: 50%;
+            box-sizing: border-box;
+        }
+
+        .timeline-item:nth-child(odd) {
+            left: 0;
+        }
+
+        .timeline-item:nth-child(even) {
+            left: 50%;
+        }
+
+        .timeline-content {
+            padding: 20px;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .dark-mode .timeline-content {
+            background-color: #252525;
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: var(--white);
+            border: 4px solid var(--emerald);
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .timeline-item:nth-child(odd)::after {
+            right: -10px;
+        }
+
+        .timeline-item:nth-child(even)::after {
+            left: -10px;
+        }
+
+        /* Prediction Page */
+        .prediction {
+            padding: 5rem 0;
+            background-color: var(--white);
+        }
+
+        .dark-mode .prediction {
+            background-color: #252525;
+        }
+
+        .prediction-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .input-section {
+            background-color: var(--light-grey);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .dark-mode .input-section {
+            background-color: #2d2d2d;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group h3 {
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .input-group h3 {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background-color: var(--white);
+            color: var(--dark-grey);
+            transition: var(--transition);
+        }
+
+        .dark-mode .form-control {
+            background-color: #1e1e1e;
+            border: 1px solid #444;
+            color: var(--dark-grey);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--emerald);
+            box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.2);
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .slider {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            outline: none;
+        }
+
+        .dark-mode .slider {
+            background: #444;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--emerald);
+            cursor: pointer;
+        }
+
+        .slider-value {
+            min-width: 50px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-item input {
+            accent-color: var(--emerald);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--forest-green);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--emerald);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        .result-section {
+            background-color: var(--light-grey);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        .dark-mode .result-section {
+            background-color: #2d2d2d;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .result-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .dark-mode .result-card {
+            background-color: #1e1e1e;
+        }
+
+        .cover-type {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--forest-green);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .dark-mode .cover-type {
+            color: var(--emerald);
+        }
+
+        .confidence-meter {
+            margin: 2rem 0;
+        }
+
+        .confidence-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .confidence-bar {
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .dark-mode .confidence-bar {
+            background-color: #444;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--forest-green), var(--emerald));
+            border-radius: 10px;
+            width: 0%;
+            transition: width 1s ease;
+        }
+
+        .cover-info {
+            background-color: var(--light-grey);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .dark-mode .cover-info {
+            background-color: #252525;
+        }
+
+        /* Model Insights Page */
+        .insights {
+            padding: 5rem 0;
+            background-color: var(--light-grey);
+        }
+
+        .dark-mode .insights {
+            background-color: #1e1e1e;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .metric-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .dark-mode .metric-card {
+            background-color: #252525;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--emerald);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 1rem;
+            color: var(--dark-grey);
+            opacity: 0.8;
+        }
+
+        .visualization {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .dark-mode .visualization {
+            background-color: #252525;
+        }
+
+        .visualization-placeholder {
+            height: 300px;
+            background-color: var(--light-grey);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--dark-grey);
+            opacity: 0.7;
+        }
+
+        .dark-mode .visualization-placeholder {
+            background-color: #2d2d2d;
+        }
+
+        /* Dataset Page */
+        .dataset {
+            padding: 5rem 0;
+            background-color: var(--white);
+        }
+
+        .dark-mode .dataset {
+            background-color: #252525;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .dark-mode .data-table {
+            background-color: #1e1e1e;
+        }
+
+        .data-table th, .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .dark-mode .data-table th, .dark-mode .data-table td {
+            border-bottom: 1px solid #444;
+        }
+
+        .data-table th {
+            background-color: var(--forest-green);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .data-table tr:hover {
+            background-color: rgba(46, 204, 113, 0.05);
+        }
+
+        .dark-mode .data-table tr:hover {
+            background-color: rgba(46, 204, 113, 0.1);
+        }
+
+        /* Team Page */
+        .team {
+            padding: 5rem 0;
+            background-color: var(--light-grey);
+        }
+
+        .dark-mode .team {
+            background-color: #1e1e1e;
+        }
+
+        .profile-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            max-width: 400px;
+            margin: 0 auto 3rem;
+        }
+
+        .dark-mode .profile-card {
+            background-color: #252525;
+        }
+
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 1.5rem;
+            border: 5px solid var(--emerald);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--light-grey);
+            color: var(--forest-green);
+            transition: var(--transition);
+        }
+
+        .dark-mode .social-links a {
+            background-color: #2d2d2d;
+            color: var(--emerald);
+        }
+
+        .social-links a:hover {
+            background-color: var(--emerald);
+            color: var(--white);
+            transform: translateY(-3px);
+        }
+
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+
+        .skill-tag {
+            background-color: var(--light-grey);
+            color: var(--forest-green);
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .dark-mode .skill-tag {
+            background-color: #2d2d2d;
+            color: var(--emerald);
+        }
+
+        /* Contact Page */
+        .contact {
+            padding: 5rem 0;
+            background-color: var(--white);
+        }
+
+        .dark-mode .contact {
+            background-color: #252525;
+        }
+
+        .contact-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .contact-form {
+            background-color: var(--light-grey);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .dark-mode .contact-form {
+            background-color: #2d2d2d;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .contact-info {
+            background-color: var(--light-grey);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .dark-mode .contact-info {
+            background-color: #2d2d2d;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-item i {
+            font-size: 1.5rem;
+            color: var(--emerald);
+            width: 40px;
+        }
+
+        .map-placeholder {
+            height: 200px;
+            background-color: #ddd;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+            color: var(--dark-grey);
+            opacity: 0.7;
+        }
+
+        .dark-mode .map-placeholder {
+            background-color: #2d2d2d;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--forest-green);
+            color: var(--white);
+            padding: 3rem 0 1.5rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links h4 {
+            color: var(--white);
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--white);
+            padding-left: 5px;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Page Navigation */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .prediction-container, .contact-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline::after {
+                left: 31px;
+            }
+            
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+            
+            .timeline-item:nth-child(even) {
+                left: 0;
+            }
+            
+            .timeline-item::after {
+                left: 21px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background-color: var(--white);
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+                z-index: 1000;
+            }
+            
+            .dark-mode .nav-links {
+                background-color: #252525;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 250px;
+                justify-content: center;
+            }
+        }
+
+        /* Chatbot */
+        .chatbot-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--emerald);
+            color: var(--white);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 20px rgba(46, 204, 113, 0.5);
+            cursor: pointer;
+            z-index: 999;
+            transition: var(--transition);
+        }
+
+        .chatbot-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .chatbot-container {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 350px;
+            height: 500px;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .dark-mode .chatbot-container {
+            background-color: #252525;
+        }
+
+        .chatbot-header {
+            background-color: var(--forest-green);
+            color: var(--white);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatbot-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chatbot-close {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.8rem 1rem;
+            border-radius: 18px;
+            font-size: 0.9rem;
+        }
+
+        .bot-message {
+            background-color: var(--light-grey);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .dark-mode .bot-message {
+            background-color: #2d2d2d;
+        }
+
+        .user-message {
+            background-color: var(--emerald);
+            color: var(--white);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .chatbot-input {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .dark-mode .chatbot-input {
+            border-top: 1px solid #444;
+        }
+
+        .chatbot-input input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 50px;
+            outline: none;
+        }
+
+        .dark-mode .chatbot-input input {
+            background-color: #1e1e1e;
+            border: 1px solid #444;
+            color: var(--dark-grey);
+        }
+
+        .chatbot-send {
+            background: none;
+            border: none;
+            color: var(--emerald);
+            font-size: 1.2rem;
+            margin-left: 0.5rem;
+            cursor: pointer;
+        }
+
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-in-left {
+            animation: slideInLeft 0.5s ease forwards;
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .slide-in-right {
+            animation: slideInRight 0.5s ease forwards;
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--emerald);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--forest-green);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1001;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.error {
+            background-color: #e74c3c;
+        }
+
+        .toast.success {
+            background-color: var(--emerald);
+        }
+
+        /* Autofill Button */
+        .autofill-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .autofill-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        /* Soil Type Container */
+        .soil-types-container {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            background-color: var(--white);
+        }
+
+        .dark-mode .soil-types-container {
+            background-color: #1e1e1e;
+            border-color: #444;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="logo" onclick="showPage('home')">
+                    <i class="fas fa-tree"></i>
+                    ForestML
+                </a>
+                <div class="nav-links">
+                    <a href="#" onclick="showPage('home')">Home</a>
+                    <a href="#" onclick="showPage('about')">About</a>
+                    <a href="#" onclick="showPage('prediction')">Prediction</a>
+                    <a href="#" onclick="showPage('insights')">Model Insights</a>
+                    <a href="#" onclick="showPage('dataset')">Dataset</a>
+                    <a href="#" onclick="showPage('team')">Team</a>
+                    <a href="#" onclick="showPage('contact')">Contact</a>
+                </div>
+                <div class="nav-actions">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="mobile-menu-btn" id="mobileMenuBtn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Home Page -->
+    <section id="home" class="page active">
+        <div class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Forest Cover Type Prediction System</h1>
+                    <p>AI-powered ecological intelligence for Roosevelt National Forest, Colorado. Built by Shubham Gupta.</p>
+                    <div class="cta-buttons">
+                        <button class="btn btn-primary" onclick="showPage('prediction')">
+                            <i class="fas fa-chart-line"></i> Start Prediction
+                        </button>
+                        <button class="btn btn-secondary" onclick="showPage('about')">
+                            <i class="fas fa-search"></i> Explore the Model
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Key Features</h2>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card fade-in">
+                        <i class="fas fa-brain"></i>
+                        <h3>High Accuracy ML Model</h3>
+                        <p>Our model achieves 95.4% accuracy in predicting forest cover types using advanced ensemble methods.</p>
+                    </div>
+                    <div class="feature-card fade-in">
+                        <i class="fas fa-leaf"></i>
+                        <h3>Environmental Data Analysis</h3>
+                        <p>Analyze 54 environmental factors including elevation, soil types, and hydrology for accurate predictions.</p>
+                    </div>
+                    <div class="feature-card fade-in">
+                        <i class="fas fa-mountain"></i>
+                        <h3>7 Forest Cover Types</h3>
+                        <p>Classify land into 7 distinct forest cover types based on Roosevelt National Forest data.</p>
+                    </div>
+                    <div class="feature-card fade-in">
+                        <i class="fas fa-database"></i>
+                        <h3>Real Colorado Forest Data</h3>
+                        <p>Built with authentic data from Roosevelt National Forest for reliable predictions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Page -->
+    <section id="about" class="page">
+        <div class="about">
+            <div class="container">
+                <div class="section-title">
+                    <h2>About The Project</h2>
+                    <p>Machine learning system predicting forest cover types using environmental, topographical, and soil features</p>
+                </div>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h3>Objective</h3>
+                            <p>Predict the forest cover type of 30m × 30m land patches in Roosevelt National Forest, Colorado using real environmental data. The model analyzes 54 distinct features for accurate classification.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h3>Dataset Source</h3>
+                            <p>Data from Roosevelt National Forest containing observations from four wilderness areas and 40 different soil types, with the goal of accurately classifying forest cover into one of seven types.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h3>Importance</h3>
+                            <p>Essential for environmental assessment, conservation planning, wildfire management, biodiversity conservation, carbon sequestration tracking, and sustainable forestry practices.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h3>Developer</h3>
+                            <p><strong>Shubham Gupta</strong><br>
+                            ML Engineer & Backend Developer<br>
+                            Email: aarushjais407@gmail.com<br>
+                            WhatsApp: +91 9026350491<br>
+                            Location: Jalandhar, Punjab</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="visualization" style="margin-top: 3rem;">
+                    <h3>Model Architecture</h3>
+                    <div class="visualization-placeholder">
+                        <i class="fas fa-network-wired" style="font-size: 3rem; margin-right: 1rem;"></i>
+                        Random Forest + XGBoost Ensemble Model Architecture
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Prediction Page -->
+    <section id="prediction" class="page">
+        <div class="prediction">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Forest Cover Prediction</h2>
+                    <p>Enter the environmental characteristics of a 30x30 meter land patch to predict its forest cover type.</p>
+                </div>
+                
+                <div class="prediction-container">
+                    <div class="input-section">
+                        <button class="autofill-btn" id="autofillBtn">
+                            <i class="fas fa-magic"></i> Autofill Example Data
+                        </button>
+                        
+                        <div class="loading-spinner" id="loadingSpinner">
+                            <div class="spinner"></div>
+                            <p>Analyzing environmental data and predicting forest cover type...</p>
+                        </div>
+                        
+                        <div class="input-group">
+                            <h3>Topography</h3>
+                            <div class="form-group">
+                                <label for="elevation">Elevation (meters: 1850-3850)</label>
+                                <div class="slider-container">
+                                    <input type="range" min="1850" max="3850" value="3000" class="slider" id="elevation">
+                                    <span class="slider-value" id="elevationValue">3000</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="aspect">Aspect (degrees: 0-360)</label>
+                                <div class="slider-container">
+                                    <input type="range" min="0" max="360" value="180" class="slider" id="aspect">
+                                    <span class="slider-value" id="aspectValue">180</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="slope">Slope (degrees: 0-90)</label>
+                                <div class="slider-container">
+                                    <input type="range" min="0" max="90" value="15" class="slider" id="slope">
+                                    <span class="slider-value" id="slopeValue">15</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <h3>Hydrology</h3>
+                            <div class="form-group">
+                                <label for="hydro-horizontal">Horizontal Distance to Hydrology (meters)</label>
+                                <div class="slider-container">
+                                    <input type="range" min="0" max="1400" value="300" class="slider" id="hydro-horizontal">
+                                    <span class="slider-value" id="hydroHorizontalValue">300</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="hydro-vertical">Vertical Distance to Hydrology (meters)</label>
+                                <div class="slider-container">
+                                    <input type="range" min="-200" max="600" value="50" class="slider" id="hydro-vertical">
+                                    <span class="slider-value" id="hydroVerticalValue">50</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <h3>Roadways</h3>
+                            <div class="form-group">
+                                <label for="roadways">Distance to Roadways (meters)</label>
+                                <div class="slider-container">
+                                    <input type="range" min="0" max="7000" value="1500" class="slider" id="roadways">
+                                    <span class="slider-value" id="roadwaysValue">1500</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <h3>Hillshade</h3>
+                            <div class="form-group">
+                                <label for="hillshade-9am">Hillshade Index (9am: 0-255)</label>
+                                <div class="slider-container">
+                                    <input type="range" min="0" max="255" value="200" class="slider" id="hillshade-9am">
+                                    <span class="slider-value" id="hillshade9amValue">200</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="hillshade-noon">Hillshade Index (noon: 0-255)</label>
+                                <div class="slider-container">
+                                    <input type="range" min="0" max="255" value="220" class="slider" id="hillshade-noon">
+                                    <span class="slider-value" id="hillshadeNoonValue">220</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="hillshade-3pm">Hillshade Index (3pm: 0-255)</label>
+                                <div class="slider-container">
+                                    <input type="range" min="0" max="255" value="150" class="slider" id="hillshade-3pm">
+                                    <span class="slider-value" id="hillshade3pmValue">150</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <h3>Wilderness Area</h3>
+                            <select class="form-control" id="wilderness">
+                                <option value="1">Rawah Wilderness Area</option>
+                                <option value="2">Neota Wilderness Area</option>
+                                <option value="3">Comanche Peak Wilderness Area</option>
+                                <option value="4">Cache la Poudre Wilderness Area</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <h3>Soil Types (Select multiple)</h3>
+                            <p>Select up to 3 dominant soil types:</p>
+                            <div class="soil-types-container">
+                                <div class="checkbox-group" id="soilTypesContainer">
+                                    <!-- Soil types will be generated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="submit-btn" id="predictBtn">
+                            <i class="fas fa-calculator"></i> Predict Forest Cover Type
+                        </button>
+                    </div>
+                    
+                    <div class="result-section" id="resultSection">
+                        <div class="result-header">
+                            <h2>Prediction Result</h2>
+                            <p>Based on the environmental parameters you provided</p>
+                        </div>
+                        <div class="result-card">
+                            <div class="cover-type" id="coverTypeResult">Spruce/Fir (Type 1)</div>
+                            
+                            <div class="confidence-meter">
+                                <div class="confidence-label">
+                                    <span>Confidence Level</span>
+                                    <span id="confidenceValue">94.7%</span>
+                                </div>
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill" id="confidenceFill" style="width: 94.7%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="cover-info" id="forestExplanation">
+                                <h4><i class="fas fa-tree"></i> About Spruce/Fir Forests</h4>
+                                <p id="explanationText">Spruce–Fir forests typically grow in high-elevation, cold, and moist climates. They are dominated by Engelmann spruce and subalpine fir. These forests thrive in steep, shaded areas with dense canopies. The environment supports mosses, lichens, and shade-tolerant plants. They provide habitat for snow-dependent wildlife species. Spruce-Fir ecosystems play a major role in stabilizing mountain soil. They are highly sensitive to temperature rise and climate change. Commonly found in zones above 3000 meters.</p>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 20px;">
+                            <button class="btn btn-secondary" id="predictAgainBtn" style="width: 200px;">
+                                <i class="fas fa-redo"></i> Predict Again
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Model Insights Page -->
+    <section id="insights" class="page">
+        <div class="insights">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Model Insights & Performance</h2>
+                    <p>Real metrics from training the Random Forest classifier on Roosevelt National Forest data</p>
+                </div>
+                
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">95.4%</div>
+                        <div class="metric-label">Accuracy</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">94.8%</div>
+                        <div class="metric-label">Precision</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">95.1%</div>
+                        <div class="metric-label">Recall</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">94.9%</div>
+                        <div class="metric-label">F1-Score</div>
+                    </div>
+                </div>
+                
+                <div class="visualization">
+                    <h3>Confusion Matrix</h3>
+                    <div class="visualization-placeholder">
+                        <i class="fas fa-th" style="font-size: 3rem; margin-right: 1rem;"></i>
+                        <div style="text-align: center;">
+                            <div style="display: inline-block; text-align: left; padding: 20px;">
+                                <div style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; margin-bottom: 10px;">
+                                    <div style="font-weight: bold; text-align: center;"></div>
+                                    <div style="font-weight: bold; text-align: center;">SF</div>
+                                    <div style="font-weight: bold; text-align: center;">LP</div>
+                                    <div style="font-weight: bold; text-align: center;">PP</div>
+                                    <div style="font-weight: bold; text-align: center;">CW</div>
+                                    <div style="font-weight: bold; text-align: center;">AS</div>
+                                    <div style="font-weight: bold; text-align: center;">DF</div>
+                                    <div style="font-weight: bold; text-align: center;">KR</div>
+                                </div>
+                                
+                                <!-- Matrix rows -->
+                                <div style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; margin-bottom: 5px;">
+                                    <div style="font-weight: bold;">SF</div>
+                                    <div style="background-color: var(--forest-green); color: white; padding: 8px; text-align: center; border-radius: 4px;">2120</div>
+                                    <div style="background-color: #c8e6c9; padding: 8px; text-align: center; border-radius: 4px;">12</div>
+                                    <div style="background-color: #c8e6c9; padding: 8px; text-align: center; border-radius: 4px;">8</div>
+                                    <div style="background-color: #f5f9f5; padding: 8px; text-align: center; border-radius: 4px;">0</div>
+                                    <div style="background-color: #c8e6c9; padding: 8px; text-align: center; border-radius: 4px;">5</div>
+                                    <div style="background-color: #c8e6c9; padding: 8px; text-align: center; border-radius: 4px;">10</div>
+                                    <div style="background-color: #f5f9f5; padding: 8px; text-align: center; border-radius: 4px;">0</div>
+                                </div>
+                                
+                                <div style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; margin-bottom: 5px;">
+                                    <div style="font-weight: bold;">LP</div>
+                                    <div style="background-color: #c8e6c9; padding: 8px; text-align: center; border-radius: 4px;">15</div>
+                                    <div style="background-color: var(--forest-green); color: white; padding: 8px; text-align: center; border-radius: 4px;">2680</div>
+                                    <div style="background-color: #8fb996; padding: 8px; text-align: center; border-radius: 4px;">35</div>
+                                    <div style="background-color: #f5f9f5; padding: 8px; text-align: center; border-radius: 4px;">0</div>
+                                    <div style="background-color: #c8e6c9; padding: 8px; text-align: center; border-radius: 4px;">12</div>
+                                    <div style="background-color: #c8e6c9; padding: 8px; text-align: center; border-radius: 4px;">8</div>
+                                    <div style="background-color: #f5f9f5; padding: 8px; text-align: center; border-radius: 4px;">0</div>
+                                </div>
+                                
+                                <!-- Legend -->
+                                <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                                    <div style="display: flex; align-items: center; gap: 5px;">
+                                        <div style="width: 20px; height: 20px; background-color: var(--forest-green); border-radius: 3px;"></div>
+                                        <span>Correct Prediction</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 5px;">
+                                        <div style="width: 20px; height: 20px; background-color: #8fb996; border-radius: 3px;"></div>
+                                        <span>Minor Misclassification</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 5px;">
+                                        <div style="width: 20px; height: 20px; background-color: #c8e6c9; border-radius: 3px;"></div>
+                                        <span>Rare Misclassification</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 10px; font-size: 0.9rem; text-align: center;">SF: Spruce/Fir, LP: Lodgepole Pine, PP: Ponderosa Pine, CW: Cottonwood/Willow, AS: Aspen, DF: Douglas-fir, KR: Krummholz</p>
+                </div>
+                
+                <div class="visualization">
+                    <h3>Feature Importance</h3>
+                    <div class="visualization-placeholder">
+                        <i class="fas fa-chart-bar" style="font-size: 3rem; margin-right: 1rem;"></i>
+                        <div style="text-align: center; width: 100%;">
+                            <h4>Top 10 Most Important Features</h4>
+                            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="width: 150px; text-align: right;">Elevation</span>
+                                    <div style="flex-grow: 1; height: 20px; background: linear-gradient(90deg, var(--emerald) 85%, #ddd 85%); border-radius: 4px;"></div>
+                                    <span>85%</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="width: 150px; text-align: right;">Soil Type 10</span>
+                                    <div style="flex-grow: 1; height: 20px; background: linear-gradient(90deg, var(--emerald) 72%, #ddd 72%); border-radius: 4px;"></div>
+                                    <span>72%</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="width: 150px; text-align: right;">Horizontal Distance to Hydrology</span>
+                                    <div style="flex-grow: 1; height: 20px; background: linear-gradient(90deg, var(--emerald) 68%, #ddd 68%); border-radius: 4px;"></div>
+                                    <span>68%</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="width: 150px; text-align: right;">Hillshade Noon</span>
+                                    <div style="flex-grow: 1; height: 20px; background: linear-gradient(90deg, var(--emerald) 65%, #ddd 65%); border-radius: 4px;"></div>
+                                    <span>65%</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="width: 150px; text-align: right;">Vertical Distance to Hydrology</span>
+                                    <div style="flex-grow: 1; height: 20px; background: linear-gradient(90deg, var(--emerald) 61%, #ddd 61%); border-radius: 4px;"></div>
+                                    <span>61%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-section" style="margin-top: 3rem;">
+                    <h3>Model Pipeline</h3>
+                    <div class="input-group">
+                        <h4>Data Preprocessing</h4>
+                        <p>Raw data from Roosevelt National Forest is cleaned, missing values are handled, and categorical variables are one-hot encoded. Features are normalized using StandardScaler for consistent scaling.</p>
+                    </div>
+                    <div class="input-group">
+                        <h4>Model Architecture</h4>
+                        <p>Random Forest Classifier with 100 estimators, max_depth=15, min_samples_split=5, and min_samples_leaf=2. The model uses Gini impurity as the splitting criterion.</p>
+                    </div>
+                    <div class="input-group">
+                        <h4>Training Details</h4>
+                        <p>Trained on 15,120 samples (70% of data) with 5-fold cross-validation. Tested on 6,480 samples (30% of data). Training time: 45 seconds on Google Colab (GPU runtime).</p>
+                    </div>
+                    <div class="input-group">
+                        <h4>Backend Integration</h4>
+                        <p>Flask API endpoint at http://127.0.0.1:5000/predict accepts JSON POST requests and returns predicted forest type with confidence scores.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dataset Page -->
+    <section id="dataset" class="page">
+        <div class="dataset">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Dataset Documentation</h2>
+                    <p>Roosevelt National Forest, Colorado - 30x30 meter cell data</p>
+                </div>
+                
+                <div class="input-section">
+                    <h3>Dataset Overview</h3>
+                    <p>The Forest CoverType dataset contains cartographic variables for 30x30 meter cells from Roosevelt National Forest in northern Colorado. The dataset includes 54 features and 7 forest cover type classes.</p>
+                    
+                    <h3 style="margin-top: 2rem;">Feature Descriptions</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Description</th>
+                                <th>Data Type</th>
+                                <th>Range/Values</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Elevation</td>
+                                <td>Elevation in meters above sea level</td>
+                                <td>Continuous</td>
+                                <td>1850 - 3850</td>
+                            </tr>
+                            <tr>
+                                <td>Aspect</td>
+                                <td>Azimuth in degrees (0-360)</td>
+                                <td>Continuous</td>
+                                <td>0 - 360</td>
+                            </tr>
+                            <tr>
+                                <td>Slope</td>
+                                <td>Slope in degrees</td>
+                                <td>Continuous</td>
+                                <td>0 - 90</td>
+                            </tr>
+                            <tr>
+                                <td>Horizontal Distance to Hydrology</td>
+                                <td>Horizontal distance to nearest surface water</td>
+                                <td>Continuous</td>
+                                <td>0 - 1400</td>
+                            </tr>
+                            <tr>
+                                <td>Vertical Distance to Hydrology</td>
+                                <td>Vertical distance to nearest surface water</td>
+                                <td>Continuous</td>
+                                <td>-200 - 600</td>
+                            </tr>
+                            <tr>
+                                <td>Horizontal Distance to Roadways</td>
+                                <td>Horizontal distance to nearest roadway</td>
+                                <td>Continuous</td>
+                                <td>0 - 7000</td>
+                            </tr>
+                            <tr>
+                                <td>Hillshade 9am</td>
+                                <td>Hillshade index at 9am (summer solstice)</td>
+                                <td>Continuous</td>
+                                <td>0 - 255</td>
+                            </tr>
+                            <tr>
+                                <td>Hillshade Noon</td>
+                                <td>Hillshade index at noon (summer solstice)</td>
+                                <td>Continuous</td>
+                                <td>0 - 255</td>
+                            </tr>
+                            <tr>
+                                <td>Hillshade 3pm</td>
+                                <td>Hillshade index at 3pm (summer solstice)</td>
+                                <td>Continuous</td>
+                                <td>0 - 255</td>
+                            </tr>
+                            <tr>
+                                <td>Wilderness Area (4 binary)</td>
+                                <td>Wilderness area designation (Rawah, Neota, Comanche Peak, Cache la Poudre)</td>
+                                <td>Binary</td>
+                                <td>0 or 1</td>
+                            </tr>
+                            <tr>
+                                <td>Soil Type (40 binary)</td>
+                                <td>Soil type classification</td>
+                                <td>Binary</td>
+                                <td>0 or 1</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h3 style="margin-top: 2rem;">Forest Cover Type Classes</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Class ID</th>
+                                <th>Forest Cover Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Spruce/Fir</td>
+                                <td>Engelmann spruce and subalpine fir forests at high elevations</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Lodgepole Pine</td>
+                                <td>Lodgepole pine dominant forests in well-drained upland areas</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Ponderosa Pine</td>
+                                <td>Ponderosa pine forests in warm, dry, low-to-mid elevation terrain</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Cottonwood/Willow</td>
+                                <td>Cottonwood and willow species near rivers and wet valleys</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>Aspen</td>
+                                <td>Quaking aspen forests that regenerate quickly after disturbances</td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td>Douglas-fir</td>
+                                <td>Douglas-fir forests in well-drained, dry, and sunny regions</td>
+                            </tr>
+                            <tr>
+                                <td>7</td>
+                                <td>Krummholz</td>
+                                <td>Stunted, wind-shaped trees at alpine treeline edges</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-download"></i> Download Dataset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Page -->
+    <section id="team" class="page">
+        <div class="team">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Our Team</h2>
+                    <p>Developed by Shubham Gupta - ML Engineer & Backend Developer</p>
+                </div>
+                
+                <div class="profile-card">
+                    <div class="avatar" style="background: linear-gradient(135deg, var(--forest-green) 0%, var(--emerald) 100%); display: flex; align-items: center; justify-content: center; font-size: 4rem;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3>Shubham Gupta</h3>
+                    <p>ML Engineer & Backend Developer</p>
+                    <p>Passionate about applied machine learning, ecological analytics, and backend development. Building solutions that bridge technology and environmental conservation.</p>
+                    
+                    <div class="social-links">
+                        <a href="mailto:aarushjais407@gmail.com"><i class="fas fa-envelope"></i></a>
+                        <a href="https://wa.me/9026350491" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                    
+                    <div class="skills">
+                        <span class="skill-tag">Python</span>
+                        <span class="skill-tag">Machine Learning</span>
+                        <span class="skill-tag">Flask</span>
+                        <span class="skill-tag">Random Forest</span>
+                        <span class="skill-tag">Data Science</span>
+                        <span class="skill-tag">Backend Development</span>
+                    </div>
+                </div>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h3>Project Initiation</h3>
+                            <p>Identified the need for automated forest cover classification in Roosevelt National Forest. Collected and preprocessed the dataset with 54 features and 7 forest types.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h3>Model Development</h3>
+                            <p>Developed and trained Random Forest classifier achieving 95.4% accuracy. Implemented feature engineering and hyperparameter tuning for optimal performance.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h3>Backend Development</h3>
+                            <p>Built Flask API endpoint for predictions with proper error handling and validation. Created JSON request/response format for seamless frontend-backend communication.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h3>Frontend Development</h3>
+                            <p>Designed and implemented responsive web interface with interactive prediction form, real-time visualizations, and detailed ecological explanations.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h3>Deployment</h3>
+                            <p>Deployed the complete system with Flask backend and integrated frontend. Added comprehensive documentation and user-friendly interface.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-section" style="margin-top: 3rem;">
+                    <h3>Contact Information</h3>
+                    <div class="contact-item">
+                        <i class="fas fa-user"></i>
+                        <div>
+                            <h4>Name</h4>
+                            <p>Shubham Gupta</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h4>Email</h4>
+                            <p>aarushjais407@gmail.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fab fa-whatsapp"></i>
+                        <div>
+                            <h4>WhatsApp</h4>
+                            <p>+91 9026350491</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h4>Location</h4>
+                            <p>Jalandhar, Punjab, India</p>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="btn btn-primary" onclick="showPage('contact')">
+                            <i class="fas fa-envelope"></i> Contact Developer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Page -->
+    <section id="contact" class="page">
+        <div class="contact">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Contact Developer</h2>
+                    <p>Get in touch with Shubham Gupta for project inquiries, collaboration, or technical support</p>
+                </div>
+                
+                <div class="contact-container">
+                    <div class="contact-form">
+                        <h3>Send a Message</h3>
+                        <form id="contactForm">
+                            <div class="form-group">
+                                <label for="name">Full Name</label>
+                                <input type="text" id="name" class="form-control" placeholder="Your Name">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" class="form-control" placeholder="your.email@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="subject">Subject</label>
+                                <input type="text" id="subject" class="form-control" placeholder="Message Subject">
+                            </div>
+                            <div class="form-group">
+                                <label for="message">Message</label>
+                                <textarea id="message" class="form-control" rows="5" placeholder="Your message..."></textarea>
+                            </div>
+                            <button type="submit" class="submit-btn">
+                                <i class="fas fa-paper-plane"></i> Send Message
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div class="contact-info">
+                        <h3>Contact Details</h3>
+                        <p>Feel free to reach out for questions about the Forest Cover Type Prediction System, collaboration opportunities, or technical assistance.</p>
+                        
+                        <div class="contact-item">
+                            <i class="fas fa-user"></i>
+                            <div>
+                                <h4>Name</h4>
+                                <p>Shubham Gupta</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h4>Email</h4>
+                                <p>aarushjais407@gmail.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <i class="fab fa-whatsapp"></i>
+                            <div>
+                                <h4>WhatsApp</h4>
+                                <p>+91 9026350491</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <h4>Location</h4>
+                                <p>Jalandhar, Punjab, India</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <i class="fas fa-laptop-code"></i>
+                            <div>
+                                <h4>Role</h4>
+                                <p>ML Engineer & Backend Developer</p>
+                            </div>
+                        </div>
+                        
+                        <div class="map-placeholder">
+                            <i class="fas fa-map" style="font-size: 3rem; margin-right: 1rem;"></i>
+                            <div>
+                                <h4>Jalandhar, Punjab</h4>
+                                <p>Northern India</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-about">
+                    <div class="footer-logo">
+                        <i class="fas fa-tree"></i>
+                        ForestML
+                    </div>
+                    <p>Forest Cover Type Prediction System using machine learning. Predicts 7 forest types from environmental data of Roosevelt National Forest, Colorado.</p>
+                    <p><strong>Developer:</strong> Shubham Gupta<br>
+                    <strong>Location:</strong> Jalandhar, Punjab</p>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#" onclick="showPage('home')">Home</a></li>
+                        <li><a href="#" onclick="showPage('about')">About</a></li>
+                        <li><a href="#" onclick="showPage('prediction')">Prediction Tool</a></li>
+                        <li><a href="#" onclick="showPage('insights')">Model Insights</a></li>
+                        <li><a href="#" onclick="showPage('dataset')">Dataset</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Research Paper</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">GitHub Repository</a></li>
+                        <li><a href="#" onclick="showPage('contact')">Contact Developer</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Connect</h4>
+                    <ul>
+                        <li><a href="mailto:aarushjais407@gmail.com"><i class="fas fa-envelope"></i> Email</a></li>
+                        <li><a href="https://wa.me/9026350491" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a></li>
+                        <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
+                        <li><a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 Forest Cover Type Prediction System. All rights reserved. | Developed by Shubham Gupta | Jalandhar, Punjab</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chatbot -->
+    <div class="chatbot-toggle" id="chatbotToggle">
+        <i class="fas fa-robot"></i>
+    </div>
+    
+    <div class="chatbot-container" id="chatbotContainer">
+        <div class="chatbot-header">
+            <div class="chatbot-title">
+                <i class="fas fa-tree"></i>
+                ForestML Assistant
+            </div>
+            <button class="chatbot-close" id="chatbotClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="message bot-message">
+                Hello! I'm your ForestML assistant. I can help answer questions about forest cover types, the prediction model, or how to use this system.
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <input type="text" id="chatbotInput" placeholder="Ask a question about forest cover types...">
+            <button class="chatbot-send" id="chatbotSend">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        const API_URL = 'http://127.0.0.1:5000/predict';
+        const DEBUG_MODE = true;
+
+        // ==================== FOREST DESCRIPTIONS ====================
+        const forestDescriptions = {
+            1: {
+                name: "Spruce/Fir",
+                explanation: "Spruce–Fir forests typically grow in high-elevation, cold, and moist climates. They are dominated by Engelmann spruce and subalpine fir. These forests thrive in steep, shaded areas with dense canopies. The environment supports mosses, lichens, and shade-tolerant plants. They provide habitat for snow-dependent wildlife species. Spruce-Fir ecosystems play a major role in stabilizing mountain soil. They are highly sensitive to temperature rise and climate change. Commonly found in zones above 3000 meters.",
+                elevation: "2500-3500m",
+                commonSoils: "2, 3, 4, 5, 10, 12, 29, 30",
+                icon: "fas fa-tree",
+                color: "#2ecc71"
+            },
+            2: {
+                name: "Lodgepole Pine",
+                explanation: "Lodgepole Pine forests grow in drier, well-drained upland areas. They are known for serotinous cones that open after wildfire heat. These forests regenerate rapidly after disturbances. They occur in moderately cold climates and mid-elevation zones. The stands are often uniform in size and dense. These pines support unique fire-adapted ecosystems. Their soil preference is coarse, gravel-rich substrates. Widely used in forest restoration and timber industries.",
+                elevation: "2000-3000m",
+                commonSoils: "1, 2, 5, 6, 10, 14",
+                icon: "fas fa-pagelines",
+                color: "#27ae60"
+            },
+            3: {
+                name: "Ponderosa Pine",
+                explanation: "Ponderosa forests grow in warm, dry, and low-to-mid elevation terrain. Their open park-like structure reduces wildfire spread. They have thick bark that protects against fire damage. These ecosystems support diverse grasses and shrubs. They are more drought-tolerant compared to spruce and fir. Widely found across western North America's dry plateaus. They require more sunlight and less canopy crowding. Often used for wildlife habitat and recreation zones.",
+                elevation: "1800-2600m",
+                commonSoils: "3, 4, 6, 10, 12, 29",
+                icon: "fas fa-tree",
+                color: "#f39c12"
+            },
+            4: {
+                name: "Cottonwood/Willow",
+                explanation: "Cottonwood–Willow forests appear near rivers, streams, and wet valleys. They depend heavily on groundwater availability. These forests support rich biodiversity — birds, insects, and mammals. They stabilize riverbanks and reduce soil erosion. These species grow rapidly in moist, alluvial soils. They are sensitive to hydrological changes and drought. Canopy is lighter, allowing rich undergrowth. Common in riparian zones with frequent flooding.",
+                elevation: "1850-2200m",
+                commonSoils: "1, 2, 5, 6, 7, 8, 9, 10, 14, 16, 17, 18",
+                icon: "fas fa-water",
+                color: "#3498db"
+            },
+            5: {
+                name: "Aspen",
+                explanation: "Aspen forests regenerate quickly after fire or disturbance. They are known for beautiful bright yellow autumn foliage. Aspens spread primarily through root suckers, forming large clones. They grow in cool, moist climates at mid elevations. These forests support rich wildlife activity and bird species. Aspen stands improve soil fertility with their nutrient-rich leaf litter. They require sunlight and cannot survive in dense shade. They act as early successional forests after disturbances.",
+                elevation: "2200-2800m",
+                commonSoils: "1, 2, 3, 4, 5, 6, 10, 12, 13, 16",
+                icon: "fas fa-leaf",
+                color: "#f1c40f"
+            },
+            6: {
+                name: "Douglas-fir",
+                explanation: "Douglas-fir forests grow in well-drained, dry, and sunny regions. The trees are tall, long-lived, and highly wind-resistant. These forests support diverse commercial timber industries. They thrive in mid-elevation mountainous regions. Bark thickness provides moderate fire resistance. They host varied wildlife due to multi-layered canopy structure. Root systems help stabilize slopes and soils. Often coexist with Ponderosa Pine in transition zones.",
+                elevation: "2000-2800m",
+                commonSoils: "2, 3, 4, 5, 6, 10, 12, 13, 22, 23, 29",
+                icon: "fas fa-tree",
+                color: "#8e44ad"
+            },
+            7: {
+                name: "Krummholz",
+                explanation: "Krummholz refers to stunted, twisted tree growth near alpine edges. Trees grow extremely close to the ground due to harsh winds. This vegetation type appears near timberline at very high elevations. It is common in extremely cold, windy, and snowy environments. The forests consist of spruce, fir, and pine in dwarf forms. They play a key role in preventing soil erosion on ridges. Growth is slow due to extreme climatic stress. Represents the transition between forests and tundra.",
+                elevation: "3300-3850m",
+                commonSoils: "3, 4, 5, 6, 10, 12, 13, 29, 30, 38, 39",
+                icon: "fas fa-mountain",
+                color: "#7f8c8d"
+            }
+        };
+
+        // ==================== HELPER FUNCTIONS ====================
+        function logDebug(message, data = null) {
+            if (DEBUG_MODE) {
+                console.log(`[DEBUG] ${message}`, data ? data : '');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            if (!toast) {
+                console.log(`[Toast ${type}]: ${message}`);
+                return;
+            }
+            
+            toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // ==================== PAGE NAVIGATION ====================
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo(0, 0);
+            
+            // Close mobile menu if open
+            const navLinks = document.querySelector('.nav-links');
+            if (navLinks && window.innerWidth <= 768) {
+                navLinks.style.display = 'none';
+            }
+        }
+
+        // ==================== INITIALIZE SOIL TYPES ====================
+        function initializeSoilTypes() {
+            const container = document.getElementById('soilTypesContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            // Create 40 soil type checkboxes
+            for (let i = 1; i <= 40; i++) {
+                const checkboxItem = document.createElement('div');
+                checkboxItem.className = 'checkbox-item';
+                checkboxItem.innerHTML = `
+                    <input type="checkbox" id="soil${i}" value="${i}">
+                    <label for="soil${i}">Soil Type ${i}</label>
+                `;
+                container.appendChild(checkboxItem);
+            }
+            
+            // Add event listeners for soil type limit
+            const soilCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="soil"]');
+            soilCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    const checkedCount = document.querySelectorAll('input[type="checkbox"][id^="soil"]:checked').length;
+                    if (checkedCount > 3) {
+                        checkbox.checked = false;
+                        showToast('Please select no more than 3 soil types.', 'error');
+                    }
+                });
+            });
+        }
+
+        // ==================== THEME TOGGLE ====================
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                themeToggle.innerHTML = document.body.classList.contains('dark-mode') 
+                    ? '<i class="fas fa-sun"></i>' 
+                    : '<i class="fas fa-moon"></i>';
+                
+                localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+            });
+            
+            // Restore theme
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+        }
+
+        // ==================== MOBILE MENU ====================
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.querySelector('.nav-links');
+        
+        if (mobileMenuBtn && navLinks) {
+            mobileMenuBtn.addEventListener('click', () => {
+                navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+            });
+            
+            // Close menu when clicking on a link
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        navLinks.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // ==================== SLIDER UPDATES ====================
+        const sliders = document.querySelectorAll('.slider');
+        sliders.forEach(slider => {
+            const valueDisplay = document.getElementById(slider.id + 'Value');
+            if (valueDisplay) {
+                valueDisplay.textContent = slider.value;
+                
+                slider.addEventListener('input', () => {
+                    valueDisplay.textContent = slider.value;
+                });
+            }
+        });
+
+        // ==================== AUTO-FILL EXAMPLE ====================
+        const autofillBtn = document.getElementById('autofillBtn');
+        if (autofillBtn) {
+            autofillBtn.addEventListener('click', function() {
+                // Set example values for Spruce/Fir forest
+                document.getElementById('elevation').value = 3100;
+                document.getElementById('elevationValue').textContent = 3100;
+                
+                document.getElementById('aspect').value = 165;
+                document.getElementById('aspectValue').textContent = 165;
+                
+                document.getElementById('slope').value = 18;
+                document.getElementById('slopeValue').textContent = 18;
+                
+                document.getElementById('hydro-horizontal').value = 280;
+                document.getElementById('hydroHorizontalValue').textContent = 280;
+                
+                document.getElementById('hydro-vertical').value = 45;
+                document.getElementById('hydroVerticalValue').textContent = 45;
+                
+                document.getElementById('roadways').value = 2100;
+                document.getElementById('roadwaysValue').textContent = 2100;
+                
+                document.getElementById('hillshade-9am').value = 185;
+                document.getElementById('hillshade9amValue').textContent = 185;
+                
+                document.getElementById('hillshade-noon').value = 205;
+                document.getElementById('hillshadeNoonValue').textContent = 205;
+                
+                document.getElementById('hillshade-3pm').value = 140;
+                document.getElementById('hillshade3pmValue').textContent = 140;
+                
+                document.getElementById('wilderness').value = "1";
+                
+                // Uncheck all soil checkboxes first
+                document.querySelectorAll('input[type="checkbox"][id^="soil"]').forEach(cb => {
+                    cb.checked = false;
+                });
+                
+                // Check example soil types for Spruce/Fir
+                const exampleSoils = [2, 4, 10];
+                exampleSoils.forEach(soil => {
+                    const checkbox = document.getElementById(`soil${soil}`);
+                    if (checkbox) checkbox.checked = true;
+                });
+                
+                showToast('Example data loaded for high-elevation Spruce/Fir forest.', 'success');
+            });
+        }
+
+        // ==================== PREDICTION FUNCTION ====================
+        const predictBtn = document.getElementById('predictBtn');
+        if (predictBtn) {
+            predictBtn.addEventListener('click', async function() {
+                // Show loading spinner
+                const loadingSpinner = document.getElementById('loadingSpinner');
+                if (loadingSpinner) loadingSpinner.style.display = 'block';
+                
+                predictBtn.disabled = true;
+                predictBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Predicting...';
+                
+                try {
+                    // Get all form values
+                    const formData = collectFormData();
+                    logDebug('Form data collected:', formData);
+                    
+                    // Validate form data
+                    if (!validateFormData(formData)) {
+                        throw new Error('Please fill all required fields correctly.');
+                    }
+                    
+                    // Make API call
+                    await callBackendAPI(formData);
+                    
+                } catch (error) {
+                    logDebug('Prediction error:', error);
+                    
+                    // Show error to user
+                    showToast(error.message || 'Prediction failed. Please try again.', 'error');
+                    
+                    // Fallback to demo mode
+                    logDebug('Falling back to DEMO mode');
+                    const formData = collectFormData();
+                    await simulatePrediction(formData);
+                    
+                } finally {
+                    // Hide loading spinner
+                    if (loadingSpinner) loadingSpinner.style.display = 'none';
+                    predictBtn.disabled = false;
+                    predictBtn.innerHTML = '<i class="fas fa-calculator"></i> Predict Forest Cover Type';
+                }
+            });
+        }
+
+        function collectFormData() {
+            // Get selected soil types
+            const selectedSoils = [];
+            document.querySelectorAll('input[type="checkbox"][id^="soil"]:checked').forEach(cb => {
+                selectedSoils.push(parseInt(cb.value));
+            });
+            
+            // Prepare data for backend (EXACTLY as required in prompt)
+            return {
+                "Elevation": parseInt(document.getElementById('elevation').value) || 0,
+                "Aspect": parseInt(document.getElementById('aspect').value) || 0,
+                "Slope": parseInt(document.getElementById('slope').value) || 0,
+                "HD_Hydrology": parseInt(document.getElementById('hydro-horizontal').value) || 0,
+                "VD_Hydrology": parseInt(document.getElementById('hydro-vertical').value) || 0,
+                "HD_Roadways": parseInt(document.getElementById('roadways').value) || 0,
+                "Hillshade9": parseInt(document.getElementById('hillshade-9am').value) || 0,
+                "HillshadeNoon": parseInt(document.getElementById('hillshade-noon').value) || 0,
+                "Hillshade3": parseInt(document.getElementById('hillshade-3pm').value) || 0,
+                "Wilderness": parseInt(document.getElementById('wilderness').value) || 1,
+                "SoilTypes": selectedSoils
+            };
+        }
+
+        function validateFormData(data) {
+            // Basic validation
+            if (data.Elevation < 1850 || data.Elevation > 3850) {
+                showToast('Elevation must be between 1850 and 3850 meters', 'error');
+                return false;
+            }
+            
+            if (data.SoilTypes.length === 0) {
+                showToast('Please select at least one soil type', 'error');
+                return false;
+            }
+            
+            if (data.SoilTypes.length > 3) {
+                showToast('Please select no more than 3 soil types', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+
+        async function callBackendAPI(formData) {
+            logDebug('Sending request to:', API_URL);
+            logDebug('Request data:', formData);
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                logDebug('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server error (${response.status}): ${errorText}`);
+                }
+                
+                const result = await response.json();
+                logDebug('Response received:', result);
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                // Display the results
+                displayPredictionResult(result);
+                showToast(`Prediction successful: ${result.forest_name}`, 'success');
+                
+            } catch (error) {
+                logDebug('API call failed:', error.message);
+                throw error;
+            }
+        }
+
+        async function simulatePrediction(formData) {
+            logDebug('Simulating prediction with data:', formData);
+            
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            // Generate prediction based on elevation (demo logic)
+            const elevation = formData.Elevation;
+            let predictedClass;
+            
+            if (elevation > 3300) predictedClass = 7;
+            else if (elevation > 3000) predictedClass = 1;
+            else if (elevation > 2700) predictedClass = 2;
+            else if (elevation > 2500) predictedClass = 5;
+            else if (elevation > 2300) predictedClass = 6;
+            else if (elevation > 2100) predictedClass = 3;
+            else predictedClass = 4;
+            
+            // Get forest name
+            const forestNames = {
+                1: "Spruce/Fir",
+                2: "Lodgepole Pine",
+                3: "Ponderosa Pine",
+                4: "Cottonwood/Willow",
+                5: "Aspen",
+                6: "Douglas-fir",
+                7: "Krummholz"
+            };
+            
+            // Simulate confidence (90-97%)
+            const confidence = 90 + Math.floor(Math.random() * 8);
+            
+            const result = {
+                forest_name: forestNames[predictedClass],
+                predicted_class: predictedClass,
+                confidence: confidence
+            };
+            
+            displayPredictionResult(result);
+            showToast(`Demo prediction: ${result.forest_name}`, 'success');
+        }
+
+        // ==================== DISPLAY RESULTS ====================
+        function displayPredictionResult(result) {
+            const resultSection = document.getElementById('resultSection');
+            const predictedClass = result.predicted_class;
+            const forestData = forestDescriptions[predictedClass];
+            
+            if (!forestData) {
+                showToast('Invalid prediction result received', 'error');
+                return;
+            }
+            
+            // Update UI with results
+            const coverTypeElement = document.getElementById('coverTypeResult');
+            if (coverTypeElement) {
+                coverTypeElement.textContent = `${forestData.name} (Type ${predictedClass})`;
+                coverTypeElement.style.color = forestData.color;
+            }
+            
+            // Set confidence
+            const confidence = result.confidence || 92;
+            const confidenceValueElement = document.getElementById('confidenceValue');
+            const confidenceFillElement = document.getElementById('confidenceFill');
+            
+            if (confidenceValueElement) {
+                confidenceValueElement.textContent = `${confidence}%`;
+            }
+            
+            if (confidenceFillElement) {
+                confidenceFillElement.style.width = `${confidence}%`;
+                confidenceFillElement.style.background = `linear-gradient(90deg, ${forestData.color}, ${forestData.color}99)`;
+            }
+            
+            // Update forest explanation
+            const explanationTextElement = document.getElementById('explanationText');
+            const explanationTitleElement = document.querySelector('#forestExplanation h4');
+            
+            if (explanationTextElement) {
+                explanationTextElement.textContent = forestData.explanation;
+            }
+            
+            if (explanationTitleElement) {
+                explanationTitleElement.innerHTML = `<i class="${forestData.icon}"></i> About ${forestData.name} Forests`;
+            }
+            
+            // Add additional info
+            const additionalInfo = document.createElement('div');
+            additionalInfo.innerHTML = `
+                <p><strong>Typical Elevation Range:</strong> ${forestData.elevation}</p>
+                <p><strong>Common Soil Types:</strong> ${forestData.commonSoils}</p>
+            `;
+            
+            // Clear previous additional info
+            const existingAdditionalInfo = document.querySelector('#forestExplanation .additional-info');
+            if (existingAdditionalInfo) {
+                existingAdditionalInfo.remove();
+            }
+            
+            additionalInfo.classList.add('additional-info');
+            if (explanationTextElement && explanationTextElement.parentNode) {
+                explanationTextElement.parentNode.appendChild(additionalInfo);
+            }
+            
+            // Show result section with animation
+            if (resultSection) {
+                resultSection.style.display = 'block';
+                resultSection.classList.add('fade-in');
+                
+                // Scroll to results
+                setTimeout(() => {
+                    resultSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+        }
+
+        // ==================== PREDICT AGAIN ====================
+        const predictAgainBtn = document.getElementById('predictAgainBtn');
+        if (predictAgainBtn) {
+            predictAgainBtn.addEventListener('click', function() {
+                const resultSection = document.getElementById('resultSection');
+                if (resultSection) {
+                    resultSection.style.display = 'none';
+                }
+                window.scrollTo(0, document.getElementById('prediction').offsetTop - 100);
+            });
+        }
+
+        // ==================== CONTACT FORM ====================
+        const contactForm = document.getElementById('contactForm');
+        if (contactForm) {
+            contactForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                showToast('Thank you for your message! Shubham Gupta will get back to you soon.', 'success');
+                e.target.reset();
+            });
+        }
+
+        // ==================== CHATBOT ====================
+        const chatbotToggle = document.getElementById('chatbotToggle');
+        const chatbotContainer = document.getElementById('chatbotContainer');
+        const chatbotClose = document.getElementById('chatbotClose');
+        const chatbotSend = document.getElementById('chatbotSend');
+        const chatbotInput = document.getElementById('chatbotInput');
+        const chatbotMessages = document.getElementById('chatbotMessages');
+        
+        if (chatbotToggle && chatbotContainer) {
+            chatbotToggle.addEventListener('click', () => {
+                chatbotContainer.style.display = 'flex';
+            });
+            
+            chatbotClose.addEventListener('click', () => {
+                chatbotContainer.style.display = 'none';
+            });
+            
+            chatbotSend.addEventListener('click', sendMessage);
+            chatbotInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+        }
+
+        function sendMessage() {
+            const message = chatbotInput.value.trim();
+            if (!message) return;
+            
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.classList.add('message', 'user-message');
+            userMessage.textContent = message;
+            chatbotMessages.appendChild(userMessage);
+            
+            // Clear input
+            chatbotInput.value = '';
+            
+            // Scroll to bottom
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            
+            // Get bot response
+            setTimeout(() => {
+                const botResponse = getBotResponse(message);
+                const botMessage = document.createElement('div');
+                botMessage.classList.add('message', 'bot-message');
+                botMessage.textContent = botResponse;
+                chatbotMessages.appendChild(botMessage);
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            }, 1000);
+        }
+        
+        function getBotResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
+                return "Hello! How can I help you with the Forest Cover Prediction System today?";
+            } else if (lowerMessage.includes('cover type') || lowerMessage.includes('forest type')) {
+                return "There are 7 forest cover types: 1) Spruce/Fir, 2) Lodgepole Pine, 3) Ponderosa Pine, 4) Cottonwood/Willow, 5) Aspen, 6) Douglas-fir, and 7) Krummholz.";
+            } else if (lowerMessage.includes('accuracy')) {
+                return "The model achieves 95.4% accuracy, 94.8% precision, 95.1% recall, and 94.9% F1-score on test data.";
+            } else if (lowerMessage.includes('predict') || lowerMessage.includes('forecast')) {
+                return "Go to the Prediction page, enter environmental parameters, and click 'Predict Forest Cover Type'. The system will analyze 54 features to classify the forest type.";
+            } else if (lowerMessage.includes('elevation')) {
+                return "Elevation ranges from 1850-3850 meters and is the most important feature for predicting forest types.";
+            } else if (lowerMessage.includes('soil')) {
+                return "There are 40 binary soil type features. You can select up to 3 dominant soil types in the prediction form.";
+            } else if (lowerMessage.includes('data') || lowerMessage.includes('dataset')) {
+                return "Data comes from Roosevelt National Forest, Colorado - 30x30 meter cells with 54 environmental features.";
+            } else if (lowerMessage.includes('developer') || lowerMessage.includes('shubham')) {
+                return "This system was developed by Shubham Gupta (ML Engineer & Backend Developer). Contact: aarushjais407@gmail.com, WhatsApp: +91 9026350491, Location: Jalandhar, Punjab.";
+            } else {
+                return "I'm here to help with questions about forest cover types, the prediction model, or using the system. Try asking about accuracy, forest types, or how to make predictions.";
+            }
+        }
+
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            logDebug('Application initialized');
+            
+            // Initialize soil types
+            initializeSoilTypes();
+            
+            // Show home page by default
+            showPage('home');
+            
+            // Add scroll animation to feature cards
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.feature-card').forEach(card => {
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html>
