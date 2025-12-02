@@ -2,22 +2,22 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import joblib
 import pandas as pd
+import os
 
 app = Flask(__name__)
-CORS(app)  # optional, but safe
-
-# Serve fore.html (your frontend)
-@app.route("/")
-def home():
-    return render_template("fore.html")
-
+CORS(app)  # Allow frontend requests
 
 # ------------------------------
-# Load the retrained model
+# Load Model
 # ------------------------------
-model = joblib.load("forest_model_imp.pkl")
+MODEL_PATH = "forest_model_imp.pkl"
 
-# Feature list used during retraining
+if not os.path.exists(MODEL_PATH):
+    raise FileNotFoundError("❌ Model file 'forest_model_imp.pkl' not found on Render!")
+
+model = joblib.load(MODEL_PATH)
+
+# Model training feature order
 model_features = [
     'Elevation', 'Aspect', 'Slope',
     'Horizontal_Distance_To_Hydrology',
@@ -28,7 +28,7 @@ model_features = [
     'Wilderness_Area3', 'Wilderness_Area4'
 ] + [f"Soil_Type{i}" for i in range(1, 41)]
 
-# Forest type mapping
+# Label mapping
 cover_type_mapping = {
     1: "Spruce/Fir",
     2: "Lodgepole Pine",
@@ -39,16 +39,25 @@ cover_type_mapping = {
     7: "Krummholz"
 }
 
+# ------------------------------
+# Home Route (Serve frontend)
+# ------------------------------
+@app.route("/")
+def home():
+    try:
+        return render_template("fore.html")
+    except:
+        return "<h3>Render is running your backend successfully.</h3>", 200
+
 
 # ------------------------------
-# Predict Route
+# Predict Route  (DO NOT CHANGE)
 # ------------------------------
 @app.route("/predict", methods=["POST"])
 def predict():
-
     data = request.json
 
-    # Step 1: Base features
+    # Base features
     user_input = {
         'Elevation': data["Elevation"],
         'Aspect': data["Aspect"],
@@ -60,22 +69,22 @@ def predict():
         'Hillshade_Noon': data["HillshadeNoon"],
         'Hillshade_3pm': data["Hillshade3"],
 
-        # Wilderness one-hot encoding
+        # Wilderness encoding
         'Wilderness_Area1': 1 if data["Wilderness"] == 1 else 0,
         'Wilderness_Area2': 1 if data["Wilderness"] == 2 else 0,
         'Wilderness_Area3': 1 if data["Wilderness"] == 3 else 0,
         'Wilderness_Area4': 1 if data["Wilderness"] == 4 else 0,
     }
 
-    # Step 2: Soil types (1–40)
+    # Soil types 1–40
     for i in range(1, 41):
         user_input[f"Soil_Type{i}"] = 1 if i in data["SoilTypes"] else 0
 
-    # Step 3: Convert to dataframe in correct order
+    # Prepare input DF
     input_df = pd.DataFrame([user_input])
     input_df = input_df[model_features]
 
-    # Step 4: Predict
+    # Model prediction
     prediction = model.predict(input_df)[0]
     forest_name = cover_type_mapping[prediction]
 
@@ -86,7 +95,14 @@ def predict():
 
 
 # ------------------------------
-# Run App
+# Render Production Entry
+# ------------------------------
+def handler(event, context):
+    return app(event, context)
+
+
+# ------------------------------
+# Local Run
 # ------------------------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
