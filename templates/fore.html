@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forest Cover Type Prediction System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         :root {
             --forest-green: #0f5132;
@@ -16,6 +17,10 @@
             --border-radius: 15px;
             --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
             --glass-bg: rgba(255, 255, 255, 0.85);
+            --golden: #FFD700;
+            --sky-blue: #3498db;
+            --purple: #9b59b6;
+            --orange: #e67e22;
         }
 
         .dark-mode {
@@ -40,6 +45,7 @@
             color: var(--dark-grey);
             transition: var(--transition);
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
         h1, h2, h3, h4 {
@@ -80,6 +86,57 @@
             padding: 0 15px;
         }
 
+        /* Floating Particles Background */
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: var(--emerald);
+            border-radius: 50%;
+            opacity: 0.3;
+        }
+
+        .particle:nth-child(2n) {
+            background-color: var(--sky-blue);
+            width: 12px;
+            height: 12px;
+        }
+
+        .particle:nth-child(3n) {
+            background-color: var(--golden);
+            width: 6px;
+            height: 6px;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(-45deg, #0f5132, #2ecc71, #3498db, #9b59b6);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         /* Header & Navigation */
         header {
             background-color: var(--white);
@@ -88,10 +145,12 @@
             top: 0;
             z-index: 1000;
             transition: var(--transition);
+            backdrop-filter: blur(10px);
+            background: var(--glass-bg);
         }
 
         .dark-mode header {
-            background-color: #252525;
+            background-color: rgba(30, 30, 30, 0.9);
         }
 
         .navbar {
@@ -108,6 +167,12 @@
             font-weight: 700;
             font-size: 1.5rem;
             color: var(--forest-green);
+            animation: logoPulse 3s infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .dark-mode .logo {
@@ -126,13 +191,21 @@
         .nav-links a {
             font-weight: 500;
             position: relative;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: rgba(46, 204, 113, 0.1);
         }
 
         .nav-links a::after {
             content: '';
             position: absolute;
             bottom: -5px;
-            left: 0;
+            left: 50%;
+            transform: translateX(-50%);
             width: 0;
             height: 2px;
             background-color: var(--emerald);
@@ -140,7 +213,7 @@
         }
 
         .nav-links a:hover::after {
-            width: 100%;
+            width: 80%;
         }
 
         .nav-actions {
@@ -156,10 +229,18 @@
             cursor: pointer;
             color: var(--forest-green);
             transition: var(--transition);
+            padding: 8px;
+            border-radius: 50%;
+            background: rgba(46, 204, 113, 0.1);
         }
 
         .dark-mode .theme-toggle {
             color: var(--emerald);
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(30deg);
+            background: rgba(46, 204, 113, 0.2);
         }
 
         .mobile-menu-btn {
@@ -175,6 +256,26 @@
             color: var(--emerald);
         }
 
+        /* Guided Tour Button */
+        .tour-btn {
+            background: var(--orange);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .tour-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(230, 126, 34, 0.4);
+        }
+
         /* Hero Section */
         .hero {
             background: linear-gradient(135deg, rgba(15, 81, 50, 0.9) 0%, rgba(46, 204, 113, 0.7) 100%), url('https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') center/cover no-repeat;
@@ -183,6 +284,23 @@
             text-align: center;
             position: relative;
             overflow: hidden;
+            clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%232ecc71' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+            animation: floatingBackground 20s linear infinite;
+        }
+
+        @keyframes floatingBackground {
+            from { transform: translate(0, 0) rotate(0deg); }
+            to { transform: translate(-50px, -50px) rotate(360deg); }
         }
 
         .hero-content {
@@ -196,6 +314,7 @@
             font-size: 3.5rem;
             margin-bottom: 1.5rem;
             color: var(--white);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
         .hero p {
@@ -221,6 +340,26 @@
             align-items: center;
             gap: 0.5rem;
             border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .btn-primary {
@@ -245,9 +384,82 @@
             transform: translateY(-3px);
         }
 
+        /* Stats Counter */
+        .stats-counter {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 4rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--emerald);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
+            40% { transform: translateY(-10px) translateX(-50%); }
+            60% { transform: translateY(-5px) translateX(-50%); }
+        }
+
+        .mouse {
+            width: 30px;
+            height: 50px;
+            border: 2px solid white;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .mouse::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 10px;
+            background: white;
+            border-radius: 2px;
+            animation: scroll 2s infinite;
+        }
+
+        @keyframes scroll {
+            0% { top: 10px; opacity: 1; }
+            100% { top: 30px; opacity: 0; }
+        }
+
+        /* Features */
         .features {
             padding: 5rem 0;
             background-color: var(--white);
+            position: relative;
         }
 
         .dark-mode .features {
@@ -257,24 +469,39 @@
         .section-title {
             text-align: center;
             margin-bottom: 3rem;
+            position: relative;
         }
 
         .section-title h2 {
             font-size: 2.5rem;
             position: relative;
             display: inline-block;
+            padding-bottom: 15px;
         }
 
         .section-title h2::after {
             content: '';
             position: absolute;
-            bottom: -10px;
+            bottom: 0;
             left: 50%;
             transform: translateX(-50%);
             width: 80px;
             height: 4px;
             background-color: var(--emerald);
             border-radius: 2px;
+        }
+
+        .section-title h2::before {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 4px;
+            background-color: var(--emerald);
+            border-radius: 2px;
+            opacity: 0.5;
         }
 
         .features-grid {
@@ -292,6 +519,7 @@
             transition: var(--transition);
             position: relative;
             overflow: hidden;
+            border: 1px solid transparent;
         }
 
         .dark-mode .feature-card {
@@ -300,18 +528,107 @@
 
         .feature-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            border-color: var(--emerald);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(46, 204, 113, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .feature-card:hover::before {
+            left: 100%;
         }
 
         .feature-card i {
             font-size: 3rem;
             color: var(--emerald);
             margin-bottom: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover i {
+            transform: scale(1.2) rotate(10deg);
         }
 
         .feature-card h3 {
             font-size: 1.5rem;
             margin-bottom: 1rem;
+        }
+
+        /* Interactive Guide Overlay */
+        .guide-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .guide-content {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            animation: guideSlideIn 0.5s ease-out;
+        }
+
+        .dark-mode .guide-content {
+            background: #252525;
+        }
+
+        @keyframes guideSlideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .guide-step {
+            display: none;
+        }
+
+        .guide-step.active {
+            display: block;
+        }
+
+        .guide-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .guide-dots {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .guide-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ddd;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .guide-dot.active {
+            background: var(--emerald);
+            transform: scale(1.2);
         }
 
         /* About Page */
@@ -334,7 +651,7 @@
             content: '';
             position: absolute;
             width: 6px;
-            background-color: var(--emerald);
+            background: linear-gradient(to bottom, var(--emerald), var(--sky-blue));
             top: 0;
             bottom: 0;
             left: 50%;
@@ -347,6 +664,14 @@
             position: relative;
             width: 50%;
             box-sizing: border-box;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .timeline-item.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .timeline-item:nth-child(odd) {
@@ -362,6 +687,13 @@
             background-color: var(--white);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .timeline-content:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
         }
 
         .dark-mode .timeline-content {
@@ -378,6 +710,7 @@
             top: 15px;
             border-radius: 50%;
             z-index: 1;
+            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
         }
 
         .timeline-item:nth-child(odd)::after {
@@ -392,6 +725,7 @@
         .prediction {
             padding: 5rem 0;
             background-color: var(--white);
+            position: relative;
         }
 
         .dark-mode .prediction {
@@ -409,6 +743,9 @@
             border-radius: var(--border-radius);
             padding: 2rem;
             box-shadow: var(--shadow);
+            position: sticky;
+            top: 100px;
+            height: fit-content;
         }
 
         .dark-mode .input-section {
@@ -417,38 +754,43 @@
 
         .input-group {
             margin-bottom: 1.5rem;
+            animation: slideInLeft 0.5s ease-out;
         }
 
         .input-group h3 {
             margin-bottom: 1rem;
             padding-bottom: 0.5rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            border-bottom: 2px solid var(--emerald);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .dark-mode .input-group h3 {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        .input-group h3 i {
+            color: var(--emerald);
         }
 
         .form-control {
             width: 100%;
             padding: 0.8rem 1rem;
             border-radius: 8px;
-            border: 1px solid #ddd;
+            border: 2px solid transparent;
             background-color: var(--white);
             color: var(--dark-grey);
             transition: var(--transition);
+            font-size: 1rem;
         }
 
         .dark-mode .form-control {
             background-color: #1e1e1e;
-            border: 1px solid #444;
+            border: 2px solid #444;
             color: var(--dark-grey);
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--emerald);
-            box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.2);
+            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
         }
 
         .slider-container {
@@ -464,6 +806,7 @@
             border-radius: 4px;
             background: #ddd;
             outline: none;
+            transition: var(--transition);
         }
 
         .dark-mode .slider {
@@ -472,17 +815,27 @@
 
         .slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             background: var(--emerald);
             cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: var(--transition);
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.3);
         }
 
         .slider-value {
             min-width: 50px;
             text-align: center;
             font-weight: 600;
+            color: var(--emerald);
+            font-size: 1.1rem;
         }
 
         .checkbox-group {
@@ -496,16 +849,24 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            padding: 5px;
+            border-radius: 5px;
+            transition: var(--transition);
+        }
+
+        .checkbox-item:hover {
+            background: rgba(46, 204, 113, 0.1);
         }
 
         .checkbox-item input {
             accent-color: var(--emerald);
+            transform: scale(1.2);
         }
 
         .submit-btn {
             width: 100%;
             padding: 1rem;
-            background-color: var(--forest-green);
+            background: linear-gradient(135deg, var(--forest-green), var(--emerald));
             color: var(--white);
             border: none;
             border-radius: 8px;
@@ -517,12 +878,37 @@
             justify-content: center;
             align-items: center;
             gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .submit-btn:hover::after {
+            width: 300px;
+            height: 300px;
         }
 
         .submit-btn:hover {
-            background-color: var(--emerald);
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+            box-shadow: 0 5px 20px rgba(46, 204, 113, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
         }
 
         .result-section {
@@ -531,6 +917,7 @@
             padding: 2rem;
             box-shadow: var(--shadow);
             display: none;
+            animation: fadeIn 0.5s ease;
         }
 
         .dark-mode .result-section {
@@ -548,6 +935,15 @@
             padding: 2rem;
             box-shadow: var(--shadow);
             margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+            animation: resultPulse 2s infinite;
+        }
+
+        @keyframes resultPulse {
+            0%, 100% { border-color: transparent; }
+            50% { border-color: var(--emerald); }
         }
 
         .dark-mode .result-card {
@@ -560,6 +956,10 @@
             color: var(--forest-green);
             text-align: center;
             margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .dark-mode .cover-type {
@@ -574,6 +974,7 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 0.5rem;
+            font-weight: 600;
         }
 
         .confidence-bar {
@@ -581,6 +982,7 @@
             background-color: #e0e0e0;
             border-radius: 10px;
             overflow: hidden;
+            position: relative;
         }
 
         .dark-mode .confidence-bar {
@@ -592,7 +994,25 @@
             background: linear-gradient(90deg, var(--forest-green), var(--emerald));
             border-radius: 10px;
             width: 0%;
-            transition: width 1s ease;
+            transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .confidence-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         .cover-info {
@@ -600,10 +1020,39 @@
             border-radius: var(--border-radius);
             padding: 1.5rem;
             margin-top: 1.5rem;
+            animation: slideInUp 0.5s ease;
         }
 
         .dark-mode .cover-info {
             background-color: #252525;
+        }
+
+        /* Real-time Parameter Effects */
+        .parameter-effects {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: rgba(46, 204, 113, 0.05);
+            border-radius: 10px;
+        }
+
+        .effect-item {
+            text-align: center;
+            padding: 0.5rem;
+        }
+
+        .effect-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--emerald);
+        }
+
+        .effect-label {
+            font-size: 0.8rem;
+            opacity: 0.7;
         }
 
         /* Model Insights Page */
@@ -630,14 +1079,17 @@
             text-align: center;
             box-shadow: var(--shadow);
             transition: var(--transition);
-        }
-
-        .dark-mode .metric-card {
-            background-color: #252525;
+            position: relative;
+            overflow: hidden;
         }
 
         .metric-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .dark-mode .metric-card {
+            background-color: #252525;
         }
 
         .metric-value {
@@ -645,6 +1097,7 @@
             font-weight: 700;
             color: var(--emerald);
             margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px rgba(46, 204, 113, 0.3);
         }
 
         .metric-label {
@@ -659,6 +1112,7 @@
             padding: 2rem;
             box-shadow: var(--shadow);
             margin-bottom: 2rem;
+            animation: slideInUp 0.5s ease;
         }
 
         .dark-mode .visualization {
@@ -708,6 +1162,7 @@
             padding: 1rem;
             text-align: left;
             border-bottom: 1px solid #eee;
+            transition: var(--transition);
         }
 
         .dark-mode .data-table th, .dark-mode .data-table td {
@@ -718,14 +1173,21 @@
             background-color: var(--forest-green);
             color: var(--white);
             font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .data-table tr {
+            transition: var(--transition);
         }
 
         .data-table tr:hover {
-            background-color: rgba(46, 204, 113, 0.05);
+            background-color: rgba(46, 204, 113, 0.1);
+            transform: translateX(5px);
         }
 
         .dark-mode .data-table tr:hover {
-            background-color: rgba(46, 204, 113, 0.1);
+            background-color: rgba(46, 204, 113, 0.2);
         }
 
         /* Team Page */
@@ -746,6 +1208,18 @@
             box-shadow: var(--shadow);
             max-width: 400px;
             margin: 0 auto 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--emerald), var(--sky-blue));
         }
 
         .dark-mode .profile-card {
@@ -759,6 +1233,12 @@
             object-fit: cover;
             margin: 0 auto 1.5rem;
             border: 5px solid var(--emerald);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+            transition: var(--transition);
+        }
+
+        .profile-img:hover {
+            transform: scale(1.05);
         }
 
         .social-links {
@@ -788,7 +1268,7 @@
         .social-links a:hover {
             background-color: var(--emerald);
             color: var(--white);
-            transform: translateY(-3px);
+            transform: translateY(-3px) rotate(5deg);
         }
 
         .skills {
@@ -806,6 +1286,13 @@
             border-radius: 50px;
             font-size: 0.9rem;
             font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .skill-tag:hover {
+            transform: translateY(-2px);
+            background-color: var(--emerald);
+            color: white;
         }
 
         .dark-mode .skill-tag {
@@ -842,6 +1329,7 @@
 
         .form-group {
             margin-bottom: 1.5rem;
+            position: relative;
         }
 
         .form-group label {
@@ -866,6 +1354,14 @@
             align-items: center;
             gap: 1rem;
             margin-bottom: 1.5rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .contact-item:hover {
+            background: rgba(46, 204, 113, 0.1);
+            transform: translateX(5px);
         }
 
         .contact-item i {
@@ -884,6 +1380,23 @@
             margin-top: 2rem;
             color: var(--dark-grey);
             opacity: 0.7;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-placeholder::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 48%, var(--emerald) 50%, transparent 52%);
+            background-size: 20px 20px;
+            animation: mapGrid 20s linear infinite;
+        }
+
+        @keyframes mapGrid {
+            0% { background-position: 0 0; }
+            100% { background-position: 40px 40px; }
         }
 
         .dark-mode .map-placeholder {
@@ -895,6 +1408,18 @@
             background-color: var(--forest-green);
             color: var(--white);
             padding: 3rem 0 1.5rem;
+            clip-path: polygon(0 20%, 100% 0, 100% 100%, 0 100%);
+            position: relative;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
 
         .footer-content {
@@ -902,6 +1427,8 @@
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 2rem;
             margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
         }
 
         .footer-logo {
@@ -943,78 +1470,23 @@
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             font-size: 0.9rem;
             opacity: 0.8;
+            position: relative;
+            z-index: 1;
         }
 
         /* Page Navigation */
         .page {
             display: none;
+            animation: pageFadeIn 0.5s ease;
+        }
+
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .page.active {
             display: block;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 992px) {
-            .prediction-container, .contact-container {
-                grid-template-columns: 1fr;
-            }
-            
-            .timeline::after {
-                left: 31px;
-            }
-            
-            .timeline-item {
-                width: 100%;
-                padding-left: 70px;
-                padding-right: 25px;
-            }
-            
-            .timeline-item:nth-child(even) {
-                left: 0;
-            }
-            
-            .timeline-item::after {
-                left: 21px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-                position: absolute;
-                top: 70px;
-                left: 0;
-                width: 100%;
-                background-color: var(--white);
-                flex-direction: column;
-                padding: 20px;
-                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-                z-index: 1000;
-            }
-            
-            .dark-mode .nav-links {
-                background-color: #252525;
-            }
-            
-            .mobile-menu-btn {
-                display: block;
-            }
-            
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-            
-            .cta-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .btn {
-                width: 100%;
-                max-width: 250px;
-                justify-content: center;
-            }
         }
 
         /* Chatbot */
@@ -1025,7 +1497,7 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background-color: var(--emerald);
+            background: linear-gradient(135deg, var(--emerald), var(--sky-blue));
             color: var(--white);
             display: flex;
             justify-content: center;
@@ -1035,6 +1507,12 @@
             cursor: pointer;
             z-index: 999;
             transition: var(--transition);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         .chatbot-toggle:hover {
@@ -1054,6 +1532,12 @@
             display: none;
             flex-direction: column;
             overflow: hidden;
+            animation: chatSlideUp 0.3s ease;
+        }
+
+        @keyframes chatSlideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         .dark-mode .chatbot-container {
@@ -1061,7 +1545,7 @@
         }
 
         .chatbot-header {
-            background-color: var(--forest-green);
+            background: linear-gradient(135deg, var(--forest-green), var(--emerald));
             color: var(--white);
             padding: 1rem;
             display: flex;
@@ -1081,6 +1565,11 @@
             color: var(--white);
             font-size: 1.2rem;
             cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .chatbot-close:hover {
+            transform: rotate(90deg);
         }
 
         .chatbot-messages {
@@ -1097,6 +1586,12 @@
             padding: 0.8rem 1rem;
             border-radius: 18px;
             font-size: 0.9rem;
+            animation: messageSlideIn 0.3s ease;
+        }
+
+        @keyframes messageSlideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .bot-message {
@@ -1110,7 +1605,7 @@
         }
 
         .user-message {
-            background-color: var(--emerald);
+            background: linear-gradient(135deg, var(--emerald), var(--sky-blue));
             color: var(--white);
             align-self: flex-end;
             border-bottom-right-radius: 5px;
@@ -1129,15 +1624,20 @@
         .chatbot-input input {
             flex: 1;
             padding: 0.8rem;
-            border: 1px solid #ddd;
+            border: 2px solid #ddd;
             border-radius: 50px;
             outline: none;
+            transition: var(--transition);
         }
 
         .dark-mode .chatbot-input input {
             background-color: #1e1e1e;
-            border: 1px solid #444;
+            border: 2px solid #444;
             color: var(--dark-grey);
+        }
+
+        .chatbot-input input:focus {
+            border-color: var(--emerald);
         }
 
         .chatbot-send {
@@ -1147,52 +1647,23 @@
             font-size: 1.2rem;
             margin-left: 0.5rem;
             cursor: pointer;
+            transition: var(--transition);
         }
 
-        /* Animation Classes */
-        .fade-in {
-            animation: fadeIn 0.5s ease forwards;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .slide-in-left {
-            animation: slideInLeft 0.5s ease forwards;
-        }
-
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-50px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .slide-in-right {
-            animation: slideInRight 0.5s ease forwards;
-        }
-
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(50px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        .chatbot-send:hover {
+            transform: scale(1.1);
         }
 
         /* Loading Spinner */
         .loading-spinner {
             display: none;
             text-align: center;
-            padding: 20px;
+            padding: 30px;
             margin: 20px 0;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            position: relative;
+            z-index: 100;
         }
 
         .spinner {
@@ -1226,6 +1697,8 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            backdrop-filter: blur(10px);
+            background: rgba(15, 81, 50, 0.9);
         }
 
         .toast.show {
@@ -1233,19 +1706,23 @@
         }
 
         .toast.error {
-            background-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.9);
         }
 
         .toast.success {
-            background-color: var(--emerald);
+            background: rgba(46, 204, 113, 0.9);
+        }
+
+        .toast.info {
+            background: rgba(52, 152, 219, 0.9);
         }
 
         /* Autofill Button */
         .autofill-btn {
-            background-color: #3498db;
+            background: linear-gradient(135deg, var(--sky-blue), var(--purple));
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 0.95rem;
@@ -1256,31 +1733,284 @@
             width: 100%;
             justify-content: center;
             transition: var(--transition);
+            position: relative;
+            overflow: hidden;
         }
 
         .autofill-btn:hover {
-            background-color: #2980b9;
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .autofill-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .autofill-btn:hover::after {
+            width: 300px;
+            height: 300px;
         }
 
         /* Soil Type Container */
         .soil-types-container {
             max-height: 200px;
             overflow-y: auto;
-            border: 1px solid #ddd;
+            border: 2px solid #ddd;
             border-radius: 8px;
             padding: 15px;
             margin-top: 10px;
             background-color: var(--white);
+            position: relative;
         }
 
         .dark-mode .soil-types-container {
             background-color: #1e1e1e;
             border-color: #444;
         }
+
+        /* Progress Steps */
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #ddd;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+            transition: var(--transition);
+        }
+
+        .step.active {
+            background: var(--emerald);
+            border-color: var(--emerald);
+            color: white;
+            transform: scale(1.2);
+        }
+
+        .step.completed {
+            background: var(--forest-green);
+            border-color: var(--forest-green);
+            color: white;
+        }
+
+        /* Interactive Forest Visualizer */
+        .forest-visualizer {
+            height: 300px;
+            background: linear-gradient(180deg, #0f5132 0%, #2ecc71 100%);
+            border-radius: 10px;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tree {
+            position: absolute;
+            bottom: 0;
+            width: 20px;
+            height: 100px;
+            background: #8B4513;
+        }
+
+        .tree::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            left: -30px;
+            width: 80px;
+            height: 80px;
+            background: #228B22;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(45deg);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .prediction-container, .contact-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline::after {
+                left: 31px;
+            }
+            
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+            
+            .timeline-item:nth-child(even) {
+                left: 0;
+            }
+            
+            .timeline-item::after {
+                left: 21px;
+            }
+
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background-color: var(--white);
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+                z-index: 1000;
+                border-radius: 0 0 15px 15px;
+            }
+            
+            .dark-mode .nav-links {
+                background-color: #252525;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 250px;
+                justify-content: center;
+            }
+
+            .stats-counter {
+                gap: 2rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .chatbot-container {
+                width: calc(100% - 40px);
+                right: 20px;
+                left: 20px;
+                height: 400px;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Animated Background -->
+    <div class="animated-bg"></div>
+    
+    <!-- Floating Particles -->
+    <div class="floating-particles" id="floatingParticles"></div>
+    
+    <!-- Guided Tour Overlay -->
+    <div class="guide-overlay" id="guideOverlay">
+        <div class="guide-content">
+            <div class="guide-step active" data-step="1">
+                <h3><i class="fas fa-tree"></i> Welcome to ForestML!</h3>
+                <p>This system predicts forest cover types using machine learning. Let's take a quick tour to explore all features.</p>
+                <p><strong>Developer:</strong> Shubham Gupta</p>
+                <div class="guide-navigation">
+                    <button class="btn btn-secondary" onclick="skipTour()">Skip Tour</button>
+                    <button class="btn btn-primary" onclick="nextGuideStep()">Next <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+            <div class="guide-step" data-step="2">
+                <h3><i class="fas fa-map-marked-alt"></i> Prediction Tool</h3>
+                <p>Navigate to <strong>Prediction</strong> page to input environmental parameters and get forest cover predictions.</p>
+                <p>Use sliders and checkboxes to adjust values, then click "Predict" for instant results.</p>
+                <div class="guide-navigation">
+                    <button class="btn btn-secondary" onclick="prevGuideStep()"><i class="fas fa-arrow-left"></i> Back</button>
+                    <button class="btn btn-primary" onclick="nextGuideStep()">Next <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+            <div class="guide-step" data-step="3">
+                <h3><i class="fas fa-chart-line"></i> Model Insights</h3>
+                <p>Check the <strong>Model Insights</strong> page to see performance metrics, confusion matrix, and feature importance.</p>
+                <p>Our model achieves 95.4% accuracy using Random Forest + XGBoost ensemble.</p>
+                <div class="guide-navigation">
+                    <button class="btn btn-secondary" onclick="prevGuideStep()"><i class="fas fa-arrow-left"></i> Back</button>
+                    <button class="btn btn-primary" onclick="nextGuideStep()">Next <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+            <div class="guide-step" data-step="4">
+                <h3><i class="fas fa-database"></i> Dataset Information</h3>
+                <p>The <strong>Dataset</strong> page contains detailed information about the Roosevelt National Forest data.</p>
+                <p>Explore 54 environmental features and 7 forest cover types with descriptions.</p>
+                <div class="guide-navigation">
+                    <button class="btn btn-secondary" onclick="prevGuideStep()"><i class="fas fa-arrow-left"></i> Back</button>
+                    <button class="btn btn-primary" onclick="nextGuideStep()">Next <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+            <div class="guide-step" data-step="5">
+                <h3><i class="fas fa-robot"></i> AI Assistant</h3>
+                <p>Use the <i class="fas fa-robot"></i> chatbot button in the bottom-right corner for instant help.</p>
+                <p>Ask questions about forest types, model accuracy, or how to use the system.</p>
+                <div class="guide-navigation">
+                    <button class="btn btn-secondary" onclick="prevGuideStep()"><i class="fas fa-arrow-left"></i> Back</button>
+                    <button class="btn btn-primary" onclick="completeTour()">Complete Tour</button>
+                </div>
+            </div>
+            <div class="guide-dots">
+                <span class="guide-dot active" onclick="goToStep(1)"></span>
+                <span class="guide-dot" onclick="goToStep(2)"></span>
+                <span class="guide-dot" onclick="goToStep(3)"></span>
+                <span class="guide-dot" onclick="goToStep(4)"></span>
+                <span class="guide-dot" onclick="goToStep(5)"></span>
+            </div>
+        </div>
+    </div>
+
     <!-- Header -->
     <header>
         <div class="container">
@@ -1290,15 +2020,18 @@
                     ForestML
                 </a>
                 <div class="nav-links">
-                    <a href="#" onclick="showPage('home')">Home</a>
-                    <a href="#" onclick="showPage('about')">About</a>
-                    <a href="#" onclick="showPage('prediction')">Prediction</a>
-                    <a href="#" onclick="showPage('insights')">Model Insights</a>
-                    <a href="#" onclick="showPage('dataset')">Dataset</a>
-                    <a href="#" onclick="showPage('team')">Team</a>
-                    <a href="#" onclick="showPage('contact')">Contact</a>
+                    <a href="#" onclick="showPage('home')"><i class="fas fa-home"></i> Home</a>
+                    <a href="#" onclick="showPage('about')"><i class="fas fa-info-circle"></i> About</a>
+                    <a href="#" onclick="showPage('prediction')"><i class="fas fa-calculator"></i> Prediction</a>
+                    <a href="#" onclick="showPage('insights')"><i class="fas fa-chart-line"></i> Model Insights</a>
+                    <a href="#" onclick="showPage('dataset')"><i class="fas fa-database"></i> Dataset</a>
+                    <a href="#" onclick="showPage('team')"><i class="fas fa-users"></i> Team</a>
+                    <a href="#" onclick="showPage('contact')"><i class="fas fa-envelope"></i> Contact</a>
                 </div>
                 <div class="nav-actions">
+                    <button class="tour-btn no-print" onclick="startTour()">
+                        <i class="fas fa-compass"></i> Take Tour
+                    </button>
                     <button class="theme-toggle" id="themeToggle">
                         <i class="fas fa-moon"></i>
                     </button>
@@ -1315,9 +2048,9 @@
         <div class="hero">
             <div class="container">
                 <div class="hero-content">
-                    <h1>Forest Cover Type Prediction System</h1>
-                    <p>AI-powered ecological intelligence for Roosevelt National Forest, Colorado. Built by Shubham Gupta.</p>
-                    <div class="cta-buttons">
+                    <h1 class="animate__animated animate__fadeInDown">Forest Cover Type Prediction System</h1>
+                    <p class="animate__animated animate__fadeInUp animate__delay-1s">AI-powered ecological intelligence for Roosevelt National Forest, Colorado. Built by Shubham Gupta.</p>
+                    <div class="cta-buttons animate__animated animate__fadeInUp animate__delay-2s">
                         <button class="btn btn-primary" onclick="showPage('prediction')">
                             <i class="fas fa-chart-line"></i> Start Prediction
                         </button>
@@ -1325,7 +2058,30 @@
                             <i class="fas fa-search"></i> Explore the Model
                         </button>
                     </div>
+                    
+                    <div class="stats-counter animate__animated animate__fadeInUp animate__delay-3s">
+                        <div class="stat-item">
+                            <div class="stat-number" id="accuracyCounter">0%</div>
+                            <div class="stat-label">Model Accuracy</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="dataCounter">0</div>
+                            <div class="stat-label">Data Features</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="forestCounter">0</div>
+                            <div class="stat-label">Forest Types</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="predictionCounter">0</div>
+                            <div class="stat-label">Predictions Made</div>
+                        </div>
+                    </div>
                 </div>
+            </div>
+            <div class="scroll-indicator">
+                <div class="mouse"></div>
+                <span>Scroll to explore</span>
             </div>
         </div>
 
@@ -1333,24 +2089,25 @@
             <div class="container">
                 <div class="section-title">
                     <h2>Key Features</h2>
+                    <p>Discover the powerful capabilities of our forest cover prediction system</p>
                 </div>
                 <div class="features-grid">
-                    <div class="feature-card fade-in">
+                    <div class="feature-card">
                         <i class="fas fa-brain"></i>
                         <h3>High Accuracy ML Model</h3>
                         <p>Our model achieves 95.4% accuracy in predicting forest cover types using advanced ensemble methods.</p>
                     </div>
-                    <div class="feature-card fade-in">
+                    <div class="feature-card">
                         <i class="fas fa-leaf"></i>
                         <h3>Environmental Data Analysis</h3>
                         <p>Analyze 54 environmental factors including elevation, soil types, and hydrology for accurate predictions.</p>
                     </div>
-                    <div class="feature-card fade-in">
+                    <div class="feature-card">
                         <i class="fas fa-mountain"></i>
                         <h3>7 Forest Cover Types</h3>
                         <p>Classify land into 7 distinct forest cover types based on Roosevelt National Forest data.</p>
                     </div>
-                    <div class="feature-card fade-in">
+                    <div class="feature-card">
                         <i class="fas fa-database"></i>
                         <h3>Real Colorado Forest Data</h3>
                         <p>Built with authentic data from Roosevelt National Forest for reliable predictions.</p>
@@ -1372,25 +2129,25 @@
                 <div class="timeline">
                     <div class="timeline-item">
                         <div class="timeline-content">
-                            <h3>Objective</h3>
+                            <h3><i class="fas fa-bullseye"></i> Objective</h3>
                             <p>Predict the forest cover type of 30m × 30m land patches in Roosevelt National Forest, Colorado using real environmental data. The model analyzes 54 distinct features for accurate classification.</p>
                         </div>
                     </div>
                     <div class="timeline-item">
                         <div class="timeline-content">
-                            <h3>Dataset Source</h3>
+                            <h3><i class="fas fa-database"></i> Dataset Source</h3>
                             <p>Data from Roosevelt National Forest containing observations from four wilderness areas and 40 different soil types, with the goal of accurately classifying forest cover into one of seven types.</p>
                         </div>
                     </div>
                     <div class="timeline-item">
                         <div class="timeline-content">
-                            <h3>Importance</h3>
+                            <h3><i class="fas fa-exclamation-triangle"></i> Importance</h3>
                             <p>Essential for environmental assessment, conservation planning, wildfire management, biodiversity conservation, carbon sequestration tracking, and sustainable forestry practices.</p>
                         </div>
                     </div>
                     <div class="timeline-item">
                         <div class="timeline-content">
-                            <h3>Developer</h3>
+                            <h3><i class="fas fa-user-tie"></i> Developer</h3>
                             <p><strong>Shubham Gupta</strong><br>
                             ML Engineer & Backend Developer<br>
                             Email: aarushjais407@gmail.com<br>
@@ -1401,7 +2158,7 @@
                 </div>
                 
                 <div class="visualization" style="margin-top: 3rem;">
-                    <h3>Model Architecture</h3>
+                    <h3><i class="fas fa-network-wired"></i> Model Architecture</h3>
                     <div class="visualization-placeholder">
                         <i class="fas fa-network-wired" style="font-size: 3rem; margin-right: 1rem;"></i>
                         Random Forest + XGBoost Ensemble Model Architecture
@@ -1416,8 +2173,17 @@
         <div class="prediction">
             <div class="container">
                 <div class="section-title">
-                    <h2>Forest Cover Prediction</h2>
+                    <h2><i class="fas fa-calculator"></i> Forest Cover Prediction</h2>
                     <p>Enter the environmental characteristics of a 30x30 meter land patch to predict its forest cover type.</p>
+                </div>
+                
+                <!-- Progress Steps -->
+                <div class="progress-steps">
+                    <div class="step active">1</div>
+                    <div class="step">2</div>
+                    <div class="step">3</div>
+                    <div class="step">4</div>
+                    <div class="step">5</div>
                 </div>
                 
                 <div class="prediction-container">
@@ -1428,11 +2194,28 @@
                         
                         <div class="loading-spinner" id="loadingSpinner">
                             <div class="spinner"></div>
-                            <p>Analyzing environmental data and predicting forest cover type...</p>
+                            <p>Connecting to prediction engine...</p>
+                            <p style="font-size: 0.9rem; opacity: 0.7;">This may take 3-5 seconds</p>
+                        </div>
+                        
+                        <!-- Real-time Effects Display -->
+                        <div class="parameter-effects" id="parameterEffects">
+                            <div class="effect-item">
+                                <div class="effect-value" id="elevationEffect">3000m</div>
+                                <div class="effect-label">Elevation</div>
+                            </div>
+                            <div class="effect-item">
+                                <div class="effect-value" id="slopeEffect">15°</div>
+                                <div class="effect-label">Slope</div>
+                            </div>
+                            <div class="effect-item">
+                                <div class="effect-value" id="distanceEffect">300m</div>
+                                <div class="effect-label">To Water</div>
+                            </div>
                         </div>
                         
                         <div class="input-group">
-                            <h3>Topography</h3>
+                            <h3><i class="fas fa-mountain"></i> Topography</h3>
                             <div class="form-group">
                                 <label for="elevation">Elevation (meters: 1850-3850)</label>
                                 <div class="slider-container">
@@ -1457,7 +2240,7 @@
                         </div>
                         
                         <div class="input-group">
-                            <h3>Hydrology</h3>
+                            <h3><i class="fas fa-water"></i> Hydrology</h3>
                             <div class="form-group">
                                 <label for="hydro-horizontal">Horizontal Distance to Hydrology (meters)</label>
                                 <div class="slider-container">
@@ -1475,7 +2258,7 @@
                         </div>
                         
                         <div class="input-group">
-                            <h3>Roadways</h3>
+                            <h3><i class="fas fa-road"></i> Roadways</h3>
                             <div class="form-group">
                                 <label for="roadways">Distance to Roadways (meters)</label>
                                 <div class="slider-container">
@@ -1486,7 +2269,7 @@
                         </div>
                         
                         <div class="input-group">
-                            <h3>Hillshade</h3>
+                            <h3><i class="fas fa-sun"></i> Hillshade</h3>
                             <div class="form-group">
                                 <label for="hillshade-9am">Hillshade Index (9am: 0-255)</label>
                                 <div class="slider-container">
@@ -1511,7 +2294,7 @@
                         </div>
                         
                         <div class="input-group">
-                            <h3>Wilderness Area</h3>
+                            <h3><i class="fas fa-tree"></i> Wilderness Area</h3>
                             <select class="form-control" id="wilderness">
                                 <option value="1">Rawah Wilderness Area</option>
                                 <option value="2">Neota Wilderness Area</option>
@@ -1521,7 +2304,7 @@
                         </div>
                         
                         <div class="input-group">
-                            <h3>Soil Types (Select multiple)</h3>
+                            <h3><i class="fas fa-seedling"></i> Soil Types (Select multiple)</h3>
                             <p>Select up to 3 dominant soil types:</p>
                             <div class="soil-types-container">
                                 <div class="checkbox-group" id="soilTypesContainer">
@@ -1537,11 +2320,13 @@
                     
                     <div class="result-section" id="resultSection">
                         <div class="result-header">
-                            <h2>Prediction Result</h2>
+                            <h2><i class="fas fa-chart-pie"></i> Prediction Result</h2>
                             <p>Based on the environmental parameters you provided</p>
                         </div>
                         <div class="result-card">
-                            <div class="cover-type" id="coverTypeResult">Spruce/Fir (Type 1)</div>
+                            <div class="cover-type" id="coverTypeResult">
+                                <i class="fas fa-tree"></i> Spruce/Fir (Type 1)
+                            </div>
                             
                             <div class="confidence-meter">
                                 <div class="confidence-label">
@@ -1575,7 +2360,7 @@
         <div class="insights">
             <div class="container">
                 <div class="section-title">
-                    <h2>Model Insights & Performance</h2>
+                    <h2><i class="fas fa-chart-line"></i> Model Insights & Performance</h2>
                     <p>Real metrics from training the Random Forest classifier on Roosevelt National Forest data</p>
                 </div>
                 
@@ -1599,7 +2384,7 @@
                 </div>
                 
                 <div class="visualization">
-                    <h3>Confusion Matrix</h3>
+                    <h3><i class="fas fa-th"></i> Confusion Matrix</h3>
                     <div class="visualization-placeholder">
                         <i class="fas fa-th" style="font-size: 3rem; margin-right: 1rem;"></i>
                         <div style="text-align: center;">
@@ -1660,7 +2445,7 @@
                 </div>
                 
                 <div class="visualization">
-                    <h3>Feature Importance</h3>
+                    <h3><i class="fas fa-chart-bar"></i> Feature Importance</h3>
                     <div class="visualization-placeholder">
                         <i class="fas fa-chart-bar" style="font-size: 3rem; margin-right: 1rem;"></i>
                         <div style="text-align: center; width: 100%;">
@@ -1697,21 +2482,21 @@
                 </div>
                 
                 <div class="input-section" style="margin-top: 3rem;">
-                    <h3>Model Pipeline</h3>
+                    <h3><i class="fas fa-cogs"></i> Model Pipeline</h3>
                     <div class="input-group">
-                        <h4>Data Preprocessing</h4>
+                        <h4><i class="fas fa-filter"></i> Data Preprocessing</h4>
                         <p>Raw data from Roosevelt National Forest is cleaned, missing values are handled, and categorical variables are one-hot encoded. Features are normalized using StandardScaler for consistent scaling.</p>
                     </div>
                     <div class="input-group">
-                        <h4>Model Architecture</h4>
+                        <h4><i class="fas fa-network-wired"></i> Model Architecture</h4>
                         <p>Random Forest Classifier with 100 estimators, max_depth=15, min_samples_split=5, and min_samples_leaf=2. The model uses Gini impurity as the splitting criterion.</p>
                     </div>
                     <div class="input-group">
-                        <h4>Training Details</h4>
+                        <h4><i class="fas fa-graduation-cap"></i> Training Details</h4>
                         <p>Trained on 15,120 samples (70% of data) with 5-fold cross-validation. Tested on 6,480 samples (30% of data). Training time: 45 seconds on Google Colab (GPU runtime).</p>
                     </div>
                     <div class="input-group">
-                        <h4>Backend Integration</h4>
+                        <h4><i class="fas fa-server"></i> Backend Integration</h4>
                         <p>Flask API endpoint at http://127.0.0.1:5000/predict accepts JSON POST requests and returns predicted forest type with confidence scores.</p>
                     </div>
                 </div>
@@ -1724,15 +2509,15 @@
         <div class="dataset">
             <div class="container">
                 <div class="section-title">
-                    <h2>Dataset Documentation</h2>
+                    <h2><i class="fas fa-database"></i> Dataset Documentation</h2>
                     <p>Roosevelt National Forest, Colorado - 30x30 meter cell data</p>
                 </div>
                 
                 <div class="input-section">
-                    <h3>Dataset Overview</h3>
+                    <h3><i class="fas fa-info-circle"></i> Dataset Overview</h3>
                     <p>The Forest CoverType dataset contains cartographic variables for 30x30 meter cells from Roosevelt National Forest in northern Colorado. The dataset includes 54 features and 7 forest cover type classes.</p>
                     
-                    <h3 style="margin-top: 2rem;">Feature Descriptions</h3>
+                    <h3 style="margin-top: 2rem;"><i class="fas fa-list-alt"></i> Feature Descriptions</h3>
                     <table class="data-table">
                         <thead>
                             <tr>
@@ -1812,7 +2597,7 @@
                         </tbody>
                     </table>
                     
-                    <h3 style="margin-top: 2rem;">Forest Cover Type Classes</h3>
+                    <h3 style="margin-top: 2rem;"><i class="fas fa-trees"></i> Forest Cover Type Classes</h3>
                     <table class="data-table">
                         <thead>
                             <tr>
@@ -1875,12 +2660,12 @@
         <div class="team">
             <div class="container">
                 <div class="section-title">
-                    <h2>Our Team</h2>
+                    <h2><i class="fas fa-users"></i> Our Team</h2>
                     <p>Developed by Shubham Gupta - ML Engineer & Backend Developer</p>
                 </div>
                 
                 <div class="profile-card">
-                    <div class="avatar" style="background: linear-gradient(135deg, var(--forest-green) 0%, var(--emerald) 100%); display: flex; align-items: center; justify-content: center; font-size: 4rem;">
+                    <div class="avatar" style="background: linear-gradient(135deg, var(--forest-green) 0%, var(--emerald) 100%); display: flex; align-items: center; justify-content: center; font-size: 4rem; width: 150px; height: 150px; border-radius: 50%; margin: 0 auto 1.5rem; color: white;">
                         <i class="fas fa-user"></i>
                     </div>
                     <h3>Shubham Gupta</h3>
@@ -1907,38 +2692,38 @@
                 <div class="timeline">
                     <div class="timeline-item">
                         <div class="timeline-content">
-                            <h3>Project Initiation</h3>
+                            <h3><i class="fas fa-rocket"></i> Project Initiation</h3>
                             <p>Identified the need for automated forest cover classification in Roosevelt National Forest. Collected and preprocessed the dataset with 54 features and 7 forest types.</p>
                         </div>
                     </div>
                     <div class="timeline-item">
                         <div class="timeline-content">
-                            <h3>Model Development</h3>
+                            <h3><i class="fas fa-brain"></i> Model Development</h3>
                             <p>Developed and trained Random Forest classifier achieving 95.4% accuracy. Implemented feature engineering and hyperparameter tuning for optimal performance.</p>
                         </div>
                     </div>
                     <div class="timeline-item">
                         <div class="timeline-content">
-                            <h3>Backend Development</h3>
+                            <h3><i class="fas fa-server"></i> Backend Development</h3>
                             <p>Built Flask API endpoint for predictions with proper error handling and validation. Created JSON request/response format for seamless frontend-backend communication.</p>
                         </div>
                     </div>
                     <div class="timeline-item">
                         <div class="timeline-content">
-                            <h3>Frontend Development</h3>
+                            <h3><i class="fas fa-laptop-code"></i> Frontend Development</h3>
                             <p>Designed and implemented responsive web interface with interactive prediction form, real-time visualizations, and detailed ecological explanations.</p>
                         </div>
                     </div>
                     <div class="timeline-item">
                         <div class="timeline-content">
-                            <h3>Deployment</h3>
+                            <h3><i class="fas fa-cloud-upload-alt"></i> Deployment</h3>
                             <p>Deployed the complete system with Flask backend and integrated frontend. Added comprehensive documentation and user-friendly interface.</p>
                         </div>
                     </div>
                 </div>
                 
                 <div class="input-section" style="margin-top: 3rem;">
-                    <h3>Contact Information</h3>
+                    <h3><i class="fas fa-address-card"></i> Contact Information</h3>
                     <div class="contact-item">
                         <i class="fas fa-user"></i>
                         <div>
@@ -1983,13 +2768,13 @@
         <div class="contact">
             <div class="container">
                 <div class="section-title">
-                    <h2>Contact Developer</h2>
+                    <h2><i class="fas fa-envelope"></i> Contact Developer</h2>
                     <p>Get in touch with Shubham Gupta for project inquiries, collaboration, or technical support</p>
                 </div>
                 
                 <div class="contact-container">
                     <div class="contact-form">
-                        <h3>Send a Message</h3>
+                        <h3><i class="fas fa-paper-plane"></i> Send a Message</h3>
                         <form id="contactForm">
                             <div class="form-group">
                                 <label for="name">Full Name</label>
@@ -2014,7 +2799,7 @@
                     </div>
                     
                     <div class="contact-info">
-                        <h3>Contact Details</h3>
+                        <h3><i class="fas fa-info-circle"></i> Contact Details</h3>
                         <p>Feel free to reach out for questions about the Forest Cover Type Prediction System, collaboration opportunities, or technical assistance.</p>
                         
                         <div class="contact-item">
@@ -2058,8 +2843,8 @@
                         </div>
                         
                         <div class="map-placeholder">
-                            <i class="fas fa-map" style="font-size: 3rem; margin-right: 1rem;"></i>
-                            <div>
+                            <i class="fas fa-map" style="font-size: 3rem; margin-right: 1rem; position: relative; z-index: 1;"></i>
+                            <div style="position: relative; z-index: 1;">
                                 <h4>Jalandhar, Punjab</h4>
                                 <p>Northern India</p>
                             </div>
@@ -2140,7 +2925,7 @@
         </div>
         <div class="chatbot-messages" id="chatbotMessages">
             <div class="message bot-message">
-                Hello! I'm your ForestML assistant. I can help answer questions about forest cover types, the prediction model, or how to use this system.
+                Hello! I'm your ForestML assistant. I can help answer questions about forest cover types, the prediction model, or how to use this system. How can I assist you today?
             </div>
         </div>
         <div class="chatbot-input">
@@ -2158,6 +2943,7 @@
         // ==================== CONFIGURATION ====================
         const API_URL = 'http://127.0.0.1:5000/predict';
         const DEBUG_MODE = true;
+        let predictionCount = parseInt(localStorage.getItem('predictionCount')) || 0;
 
         // ==================== FOREST DESCRIPTIONS ====================
         const forestDescriptions = {
@@ -2233,13 +3019,111 @@
                 return;
             }
             
-            toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+            toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i> ${message}`;
             toast.className = `toast ${type}`;
             toast.classList.add('show');
             
             setTimeout(() => {
                 toast.classList.remove('show');
-            }, 3000);
+            }, 4000);
+        }
+
+        // ==================== ANIMATED COUNTERS ====================
+        function animateCounter(elementId, targetValue, suffix = '') {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            let current = 0;
+            const increment = targetValue / 100;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= targetValue) {
+                    current = targetValue;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current) + suffix;
+            }, 20);
+        }
+
+        // ==================== FLOATING PARTICLES ====================
+        function createFloatingParticles() {
+            const container = document.getElementById('floatingParticles');
+            if (!container) return;
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random position
+                const size = Math.random() * 10 + 5;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // Random animation
+                const duration = Math.random() * 20 + 10;
+                const delay = Math.random() * 5;
+                particle.style.animation = `float ${duration}s ease-in-out ${delay}s infinite`;
+                
+                // Add floating animation
+                particle.style.transform = `translate(0, 0)`;
+                
+                container.appendChild(particle);
+            }
+        }
+
+        // ==================== GUIDED TOUR ====================
+        let currentStep = 1;
+        const totalSteps = 5;
+
+        function startTour() {
+            currentStep = 1;
+            document.getElementById('guideOverlay').style.display = 'flex';
+            updateGuideSteps();
+        }
+
+        function skipTour() {
+            document.getElementById('guideOverlay').style.display = 'none';
+            localStorage.setItem('tourCompleted', 'true');
+        }
+
+        function nextGuideStep() {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateGuideSteps();
+            } else {
+                completeTour();
+            }
+        }
+
+        function prevGuideStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateGuideSteps();
+            }
+        }
+
+        function goToStep(step) {
+            currentStep = step;
+            updateGuideSteps();
+        }
+
+        function updateGuideSteps() {
+            document.querySelectorAll('.guide-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.querySelector(`.guide-step[data-step="${currentStep}"]`).classList.add('active');
+            
+            document.querySelectorAll('.guide-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index + 1 === currentStep);
+            });
+        }
+
+        function completeTour() {
+            document.getElementById('guideOverlay').style.display = 'none';
+            localStorage.setItem('tourCompleted', 'true');
+            showToast('Tour completed! You can restart it anytime using the "Take Tour" button.', 'info');
         }
 
         // ==================== PAGE NAVIGATION ====================
@@ -2254,6 +3138,22 @@
             const navLinks = document.querySelector('.nav-links');
             if (navLinks && window.innerWidth <= 768) {
                 navLinks.style.display = 'none';
+            }
+            
+            // Update active nav link
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Animate timeline items when on about page
+            if (pageId === 'about') {
+                setTimeout(() => {
+                    document.querySelectorAll('.timeline-item').forEach((item, index) => {
+                        setTimeout(() => {
+                            item.classList.add('visible');
+                        }, index * 300);
+                    });
+                }, 500);
             }
         }
 
@@ -2336,9 +3236,21 @@
                 
                 slider.addEventListener('input', () => {
                     valueDisplay.textContent = slider.value;
+                    updateParameterEffects();
                 });
             }
         });
+
+        // ==================== UPDATE PARAMETER EFFECTS ====================
+        function updateParameterEffects() {
+            const elevation = document.getElementById('elevation').value;
+            const slope = document.getElementById('slope').value;
+            const hydroHorizontal = document.getElementById('hydro-horizontal').value;
+            
+            document.getElementById('elevationEffect').textContent = elevation + 'm';
+            document.getElementById('slopeEffect').textContent = slope + '°';
+            document.getElementById('distanceEffect').textContent = hydroHorizontal + 'm';
+        }
 
         // ==================== AUTO-FILL EXAMPLE ====================
         const autofillBtn = document.getElementById('autofillBtn');
@@ -2386,20 +3298,31 @@
                     if (checkbox) checkbox.checked = true;
                 });
                 
+                updateParameterEffects();
                 showToast('Example data loaded for high-elevation Spruce/Fir forest.', 'success');
             });
         }
 
-        // ==================== PREDICTION FUNCTION ====================
+        // ==================== PREDICTION FUNCTION (FIXED VERSION) ====================
         const predictBtn = document.getElementById('predictBtn');
         if (predictBtn) {
             predictBtn.addEventListener('click', async function() {
                 // Show loading spinner
                 const loadingSpinner = document.getElementById('loadingSpinner');
-                if (loadingSpinner) loadingSpinner.style.display = 'block';
+                if (loadingSpinner) {
+                    loadingSpinner.style.display = 'block';
+                    loadingSpinner.innerHTML = `
+                        <div class="spinner"></div>
+                        <p>Analyzing environmental data...</p>
+                        <p style="font-size: 0.9rem; opacity: 0.7;">Connecting to prediction engine</p>
+                    `;
+                }
                 
                 predictBtn.disabled = true;
-                predictBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Predicting...';
+                predictBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                
+                // Simulate a short delay to show loading state
+                await new Promise(resolve => setTimeout(resolve, 500));
                 
                 try {
                     // Get all form values
@@ -2411,19 +3334,33 @@
                         throw new Error('Please fill all required fields correctly.');
                     }
                     
-                    // Make API call
-                    await callBackendAPI(formData);
+                    // Try backend API first
+                    try {
+                        await callBackendAPI(formData);
+                    } catch (apiError) {
+                        logDebug('API call failed, trying fallback:', apiError.message);
+                        
+                        // Update loading message
+                        if (loadingSpinner) {
+                            loadingSpinner.innerHTML = `
+                                <div class="spinner"></div>
+                                <p>Using offline prediction model...</p>
+                                <p style="font-size: 0.9rem; opacity: 0.7;">Backend connection failed</p>
+                            `;
+                        }
+                        
+                        // Wait a bit more for fallback
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        
+                        // Use offline simulation as fallback
+                        await simulatePrediction(formData);
+                    }
                     
                 } catch (error) {
                     logDebug('Prediction error:', error);
                     
                     // Show error to user
                     showToast(error.message || 'Prediction failed. Please try again.', 'error');
-                    
-                    // Fallback to demo mode
-                    logDebug('Falling back to DEMO mode');
-                    const formData = collectFormData();
-                    await simulatePrediction(formData);
                     
                 } finally {
                     // Hide loading spinner
@@ -2481,6 +3418,10 @@
             logDebug('Sending request to:', API_URL);
             logDebug('Request data:', formData);
             
+            // Add timeout to prevent hanging
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+            
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
@@ -2488,9 +3429,11 @@
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(formData),
+                    signal: controller.signal
                 });
                 
+                clearTimeout(timeoutId);
                 logDebug('Response status:', response.status);
                 
                 if (!response.ok) {
@@ -2510,6 +3453,9 @@
                 showToast(`Prediction successful: ${result.forest_name}`, 'success');
                 
             } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new Error('Request timeout. Please check if the backend server is running.');
+                }
                 logDebug('API call failed:', error.message);
                 throw error;
             }
@@ -2519,7 +3465,7 @@
             logDebug('Simulating prediction with data:', formData);
             
             // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 800));
+            await new Promise(resolve => setTimeout(resolve, 1500));
             
             // Generate prediction based on elevation (demo logic)
             const elevation = formData.Elevation;
@@ -2554,11 +3500,15 @@
             };
             
             displayPredictionResult(result);
-            showToast(`Demo prediction: ${result.forest_name}`, 'success');
+            showToast(`Demo prediction: ${result.forest_name} (Backend not connected)`, 'info');
         }
 
         // ==================== DISPLAY RESULTS ====================
         function displayPredictionResult(result) {
+            predictionCount++;
+            localStorage.setItem('predictionCount', predictionCount);
+            updateStatsCounters();
+            
             const resultSection = document.getElementById('resultSection');
             const predictedClass = result.predicted_class;
             const forestData = forestDescriptions[predictedClass];
@@ -2571,7 +3521,7 @@
             // Update UI with results
             const coverTypeElement = document.getElementById('coverTypeResult');
             if (coverTypeElement) {
-                coverTypeElement.textContent = `${forestData.name} (Type ${predictedClass})`;
+                coverTypeElement.innerHTML = `<i class="${forestData.icon}"></i> ${forestData.name} (Type ${predictedClass})`;
                 coverTypeElement.style.color = forestData.color;
             }
             
@@ -2585,6 +3535,11 @@
             }
             
             if (confidenceFillElement) {
+                // Reset width to 0 for animation
+                confidenceFillElement.style.width = '0%';
+                // Trigger reflow
+                confidenceFillElement.offsetHeight;
+                // Animate to target width
                 confidenceFillElement.style.width = `${confidence}%`;
                 confidenceFillElement.style.background = `linear-gradient(90deg, ${forestData.color}, ${forestData.color}99)`;
             }
@@ -2601,20 +3556,21 @@
                 explanationTitleElement.innerHTML = `<i class="${forestData.icon}"></i> About ${forestData.name} Forests`;
             }
             
-            // Add additional info
-            const additionalInfo = document.createElement('div');
-            additionalInfo.innerHTML = `
-                <p><strong>Typical Elevation Range:</strong> ${forestData.elevation}</p>
-                <p><strong>Common Soil Types:</strong> ${forestData.commonSoils}</p>
-            `;
-            
             // Clear previous additional info
             const existingAdditionalInfo = document.querySelector('#forestExplanation .additional-info');
             if (existingAdditionalInfo) {
                 existingAdditionalInfo.remove();
             }
             
+            // Add additional info
+            const additionalInfo = document.createElement('div');
             additionalInfo.classList.add('additional-info');
+            additionalInfo.innerHTML = `
+                <p><strong><i class="fas fa-mountain"></i> Typical Elevation Range:</strong> ${forestData.elevation}</p>
+                <p><strong><i class="fas fa-seedling"></i> Common Soil Types:</strong> ${forestData.commonSoils}</p>
+                <p><strong><i class="fas fa-chart-line"></i> Prediction Confidence:</strong> ${confidence}%</p>
+            `;
+            
             if (explanationTextElement && explanationTextElement.parentNode) {
                 explanationTextElement.parentNode.appendChild(additionalInfo);
             }
@@ -2626,7 +3582,7 @@
                 
                 // Scroll to results
                 setTimeout(() => {
-                    resultSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 100);
             }
         }
@@ -2692,8 +3648,16 @@
             // Scroll to bottom
             chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
             
+            // Show typing indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.classList.add('message', 'bot-message');
+            typingIndicator.innerHTML = '<i class="fas fa-ellipsis-h"></i>';
+            chatbotMessages.appendChild(typingIndicator);
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            
             // Get bot response
             setTimeout(() => {
+                typingIndicator.remove();
                 const botResponse = getBotResponse(message);
                 const botMessage = document.createElement('div');
                 botMessage.classList.add('message', 'bot-message');
@@ -2722,9 +3686,21 @@
                 return "Data comes from Roosevelt National Forest, Colorado - 30x30 meter cells with 54 environmental features.";
             } else if (lowerMessage.includes('developer') || lowerMessage.includes('shubham')) {
                 return "This system was developed by Shubham Gupta (ML Engineer & Backend Developer). Contact: aarushjais407@gmail.com, WhatsApp: +91 9026350491, Location: Jalandhar, Punjab.";
+            } else if (lowerMessage.includes('how to use') || lowerMessage.includes('help')) {
+                return "1. Go to Prediction page\n2. Adjust parameters using sliders\n3. Select soil types\n4. Click Predict\n5. View results with explanations\nUse 'Take Tour' button for detailed guidance.";
+            } else if (lowerMessage.includes('backend') || lowerMessage.includes('api')) {
+                return "The backend is a Flask API at http://127.0.0.1:5000/predict that accepts JSON POST requests with environmental parameters.";
             } else {
                 return "I'm here to help with questions about forest cover types, the prediction model, or using the system. Try asking about accuracy, forest types, or how to make predictions.";
             }
+        }
+
+        // ==================== UPDATE STATS COUNTERS ====================
+        function updateStatsCounters() {
+            animateCounter('accuracyCounter', 95.4, '%');
+            animateCounter('dataCounter', 54, '');
+            animateCounter('forestCounter', 7, '');
+            animateCounter('predictionCounter', predictionCount, '');
         }
 
         // ==================== INITIALIZATION ====================
@@ -2734,8 +3710,21 @@
             // Initialize soil types
             initializeSoilTypes();
             
+            // Initialize floating particles
+            createFloatingParticles();
+            
             // Show home page by default
             showPage('home');
+            
+            // Update stats counters
+            updateStatsCounters();
+            
+            // Check if tour should be shown
+            if (!localStorage.getItem('tourCompleted')) {
+                setTimeout(() => {
+                    startTour();
+                }, 1000);
+            }
             
             // Add scroll animation to feature cards
             const observerOptions = {
@@ -2746,7 +3735,7 @@
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        entry.target.classList.add('fade-in');
+                        entry.target.classList.add('animate__animated', 'animate__fadeInUp');
                     }
                 });
             }, observerOptions);
@@ -2754,6 +3743,9 @@
             document.querySelectorAll('.feature-card').forEach(card => {
                 observer.observe(card);
             });
+            
+            // Initialize parameter effects
+            updateParameterEffects();
         });
     </script>
 </body>
