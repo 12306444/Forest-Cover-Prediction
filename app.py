@@ -3,18 +3,33 @@ from flask_cors import CORS
 import joblib
 import pandas as pd
 import os
+import urllib.request
 
 app = Flask(__name__)
 CORS(app)  # Allow frontend requests
 
 # ------------------------------
-# Load Model
+# Download model if missing
 # ------------------------------
+
 MODEL_PATH = "forest_model_imp.pkl"
 
-if not os.path.exists(MODEL_PATH):
-    raise FileNotFoundError("❌ Model file 'forest_model_imp.pkl' not found on Render!")
+MODEL_URL = "https://github.com/12306444/Forest-Cover-Prediction/releases/download/v1.0/forest_model_imp.pkl"
 
+# Auto-download model on Render if missing
+if not os.path.exists(MODEL_PATH):
+    print("⚠ Model not found — downloading from GitHub Releases...")
+    try:
+        urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
+        print("✅ Model downloaded successfully.")
+    except Exception as e:
+        print("❌ Failed to download model:", e)
+        raise FileNotFoundError("Model could not be downloaded!")
+
+
+# ------------------------------
+# Load Model
+# ------------------------------
 model = joblib.load(MODEL_PATH)
 
 # Model training feature order
@@ -47,11 +62,11 @@ def home():
     try:
         return render_template("fore.html")
     except:
-        return "<h3>Render is running your backend successfully.</h3>", 200
+        return "<h3>Render backend is running successfully.</h3>", 200
 
 
 # ------------------------------
-# Predict Route  (DO NOT CHANGE)
+# Predict Route (Frontend integration SAME)
 # ------------------------------
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -84,7 +99,7 @@ def predict():
     input_df = pd.DataFrame([user_input])
     input_df = input_df[model_features]
 
-    # Model prediction
+    # Predict
     prediction = model.predict(input_df)[0]
     forest_name = cover_type_mapping[prediction]
 
@@ -95,7 +110,7 @@ def predict():
 
 
 # ------------------------------
-# Render Production Entry
+# Render production entry
 # ------------------------------
 def handler(event, context):
     return app(event, context)
