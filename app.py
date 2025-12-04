@@ -8,51 +8,31 @@ import sys
 app = Flask(__name__, 
             static_folder='static',
             template_folder='templates')
-CORS(app)  # Enable CORS for all routes
+CORS(app)
 
-# ==================== CONFIGURATION ====================
+# ==================== CONFIG ====================
 MODEL_PATH = "forest_model_imp.pkl"
-GOOGLE_DRIVE_ID = "1D3dZRk8G0VLF9HADKXPMMq4c2OnKVi4Q"
+DROPBOX_URL = "https://www.dropbox.com/scl/fi/2ng3972vbd6xl9zvsccvm/forest_model_imp.pkl?rlkey=jhomouyhdol25jgniqdyfcj38&st=55ok58tt&dl=1"
 
-# ==================== FIXED GOOGLE DRIVE DOWNLOAD ====================
-def download_from_google_drive():
-    """Reliable Google Drive downloader with large-file support"""
+# ==================== DROPBOX DOWNLOAD ====================
+def download_model_from_dropbox():
+    """Download model from Dropbox (stable for large files)."""
     try:
-        print("📥 Downloading model from Google Drive...")
+        print("📥 Downloading model from Dropbox...")
         import requests
 
-        URL = "https://drive.google.com/uc?export=download"
-        session = requests.Session()
+        response = requests.get(DROPBOX_URL, stream=True, timeout=120)
 
-        # Step 1 → initial request
-        response = session.get(URL, params={'id': GOOGLE_DRIVE_ID}, stream=True)
-
-        # Step 2 → detect confirm token for large files
-        token = None
-        for key, value in response.cookies.items():
-            if key.startswith("download_warning"):
-                print("⚠ Large file detected — confirming download...")
-                token = value
-                break
-
-        # Step 3 → If token found, re-request with confirmation
-        if token:
-            response = session.get(
-                URL,
-                params={'id': GOOGLE_DRIVE_ID, 'confirm': token},
-                stream=True
-            )
-
-        # Step 4 → Download to file
+        # Write file
         with open(MODEL_PATH, "wb") as f:
-            for chunk in response.iter_content(32768):
+            for chunk in response.iter_content(1024 * 1024):
                 if chunk:
                     f.write(chunk)
 
-        # Step 5 → Validate download
+        # Validate
         size = os.path.getsize(MODEL_PATH)
-        if size < 5000:  # Too small = HTML response = invalid
-            print("❌ Downloaded file invalid — too small (likely HTML instead of model)")
+        if size < 5000:
+            print("❌ Dropbox returned invalid file (too small)")
             os.remove(MODEL_PATH)
             return False
 
@@ -60,13 +40,12 @@ def download_from_google_drive():
         return True
 
     except Exception as e:
-        print("❌ Google Drive download failed:", str(e))
+        print("❌ Dropbox download failed:", str(e))
         return False
 
 
 # ==================== DUMMY MODEL (Fallback) ====================
 def create_dummy_model():
-    """Create a dummy model as fallback"""
     try:
         print("⚠ Creating dummy model for testing...")
 
@@ -84,11 +63,11 @@ def create_dummy_model():
         dummy_model.fit(X, y)
 
         joblib.dump(dummy_model, MODEL_PATH)
-        print("✅ Dummy model created (predictions will be random)")
+        print("✅ Dummy model created (random predictions)")
         return True
 
     except Exception as e:
-        print(f"❌ Failed to create dummy model: {str(e)}")
+        print(f"❌ Failed to create dummy model:", str(e))
         return False
 
 
@@ -100,39 +79,35 @@ print("=" * 50)
 if not os.path.exists(MODEL_PATH):
     print("⚠ Model file not found locally")
 
-    if download_from_google_drive():
-        print("✅ Google Drive download successful")
+    if download_model_from_dropbox():
+        print("✅ Dropbox model download successful")
     else:
-        print("❌ Google Drive download failed, creating dummy model")
+        print("❌ Dropbox download failed — using dummy model")
         create_dummy_model()
 else:
-    file_size = os.path.getsize(MODEL_PATH) / (1024 * 1024)
-    print(f"✅ Model found locally: {file_size:.2f} MB")
+    size = os.path.getsize(MODEL_PATH) / (1024 * 1024)
+    print(f"✅ Model found locally: {size:.2f} MB")
 
 # Load model
 try:
     model = joblib.load(MODEL_PATH)
     print("✅ Model loaded successfully")
 
-    if hasattr(model, 'predict'):
-        print("✅ Model has predict() method - ready for inference")
+    if hasattr(model, "predict"):
+        print("✅ Model ready for inference")
     else:
-        print("❌ Model doesn't have predict() method!")
+        print("❌ Model missing predict()!")
         model = None
 
 except Exception as e:
-    print(f"❌ Failed to load model: {str(e)}")
-    model = None
-    print("⚠ Creating dummy model as fallback")
+    print("❌ Failed to load model:", str(e))
+    print("⚠ Creating dummy model...")
     create_dummy_model()
-    try:
-        model = joblib.load(MODEL_PATH)
-        print("✅ Dummy model loaded")
-    except:
-        print("❌ Even dummy model failed to load")
+    model = joblib.load(MODEL_PATH)
+    print("✅ Dummy model loaded")
 
 
-# ==================== MODEL CONFIGURATION ====================
+# ==================== MODEL CONFIG ====================
 MODEL_FEATURES = [
     'Elevation', 'Aspect', 'Slope',
     'Horizontal_Distance_To_Hydrology',
@@ -158,31 +133,27 @@ COVER_TYPE_MAPPING = {
 def home():
     try:
         return render_template("fore.html")
-    except Exception:
-        return """
-        <!DOCTYPE html>
+    except:
+        return f"""
         <html>
-        <head><title>ForestML Backend</title></head>
         <body>
-            <h1>🌲 Forest Cover Prediction System</h1>
-            <p>Backend is running successfully!</p>
-            <p>Model Loaded: {}</p>
+            <h1>ForestML Backend Running</h1>
+            <p>Model Loaded: {"Yes" if model else "No"}</p>
         </body>
         </html>
-        """.format("Yes" if model else "No")
+        """
 
 @app.route("/health")
 def health():
     return jsonify({
         "status": "healthy" if model else "unhealthy",
-        "model_loaded": model is not None,
-        "endpoints": ["/", "/health", "/test", "/predict"]
+        "model_loaded": model is not None
     })
 
 @app.route("/test")
 def test():
     return jsonify({
-        "message": "API is working",
+        "message": "API working",
         "model_loaded": model is not None
     })
 
@@ -190,16 +161,10 @@ def test():
 def predict():
 
     if model is None:
-        return jsonify({
-            "error": "Model not loaded",
-            "predicted_class": 1,
-            "forest_name": "Spruce/Fir (dummy)",
-            "confidence": 0
-        }), 500
+        return jsonify({"error": "Model not loaded"}), 500
 
     try:
         data = request.json
-        print("📝 Prediction request received")
 
         user_input = {
             'Elevation': int(data.get("Elevation", 3000)),
@@ -219,22 +184,15 @@ def predict():
         user_input['Wilderness_Area3'] = 1 if wilderness == 3 else 0
         user_input['Wilderness_Area4'] = 1 if wilderness == 4 else 0
 
-        soil_types = data.get("SoilTypes", [2, 4, 10])
+        soil = data.get("SoilTypes", [])
         for i in range(1, 41):
-            user_input[f"Soil_Type{i}"] = 1 if i in soil_types else 0
+            user_input[f"Soil_Type{i}"] = 1 if i in soil else 0
 
-        input_df = pd.DataFrame([user_input])
+        df = pd.DataFrame([user_input])
+        df = df.reindex(columns=MODEL_FEATURES, fill_value=0)
 
-        for feature in MODEL_FEATURES:
-            if feature not in input_df.columns:
-                input_df[feature] = 0
-
-        input_df = input_df[MODEL_FEATURES]
-
-        prediction = model.predict(input_df)[0]
-        forest_name = COVER_TYPE_MAPPING.get(prediction, f"Type {prediction}")
-
-        print(f"✅ Prediction successful: {forest_name}")
+        prediction = model.predict(df)[0]
+        forest_name = COVER_TYPE_MAPPING.get(prediction, "Unknown")
 
         return jsonify({
             "predicted_class": int(prediction),
@@ -243,12 +201,11 @@ def predict():
         })
 
     except Exception as e:
-        print("❌ Prediction error:", str(e))
         return jsonify({"error": str(e)}), 400
 
 
 # ==================== MAIN ====================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    print(f"🚀 Starting ForestML backend on port {port}")
+    print(f"🚀 Starting backend on port {port}")
     app.run(host="0.0.0.0", port=port, debug=False)
