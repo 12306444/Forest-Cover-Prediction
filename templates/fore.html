@@ -2194,8 +2194,8 @@
                         
                         <div class="loading-spinner" id="loadingSpinner">
                             <div class="spinner"></div>
-                            <p>Connecting to prediction engine...</p>
-                            <p style="font-size: 0.9rem; opacity: 0.7;">This may take 3-5 seconds</p>
+                            <p>Analyzing environmental data with ML model...</p>
+                            <p style="font-size: 0.9rem; opacity: 0.7;">Connecting to prediction engine</p>
                         </div>
                         
                         <!-- Real-time Effects Display -->
@@ -3303,7 +3303,7 @@
             });
         }
 
-        // ==================== PREDICTION FUNCTION (FIXED VERSION) ====================
+        // ==================== PREDICTION FUNCTION - REAL ML MODEL ONLY ====================
         const predictBtn = document.getElementById('predictBtn');
         if (predictBtn) {
             predictBtn.addEventListener('click', async function() {
@@ -3313,16 +3313,13 @@
                     loadingSpinner.style.display = 'block';
                     loadingSpinner.innerHTML = `
                         <div class="spinner"></div>
-                        <p>Analyzing environmental data...</p>
-                        <p style="font-size: 0.9rem; opacity: 0.7;">Connecting to prediction engine</p>
+                        <p>Analyzing environmental data with ML model...</p>
+                        <p style="font-size: 0.9rem; opacity: 0.7;">This may take 3-5 seconds</p>
                     `;
                 }
                 
                 predictBtn.disabled = true;
                 predictBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-                
-                // Simulate a short delay to show loading state
-                await new Promise(resolve => setTimeout(resolve, 500));
                 
                 try {
                     // Get all form values
@@ -3334,33 +3331,30 @@
                         throw new Error('Please fill all required fields correctly.');
                     }
                     
-                    // Try backend API first
-                    try {
-                        await callBackendAPI(formData);
-                    } catch (apiError) {
-                        logDebug('API call failed, trying fallback:', apiError.message);
-                        
-                        // Update loading message
-                        if (loadingSpinner) {
-                            loadingSpinner.innerHTML = `
-                                <div class="spinner"></div>
-                                <p>Using offline prediction model...</p>
-                                <p style="font-size: 0.9rem; opacity: 0.7;">Backend connection failed</p>
-                            `;
-                        }
-                        
-                        // Wait a bit more for fallback
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                        
-                        // Use offline simulation as fallback
-                        await simulatePrediction(formData);
-                    }
+                    // Make API call to REAL ML backend
+                    await callBackendAPI(formData);
                     
                 } catch (error) {
                     logDebug('Prediction error:', error);
                     
-                    // Show error to user
-                    showToast(error.message || 'Prediction failed. Please try again.', 'error');
+                    // Hide loading spinner
+                    if (loadingSpinner) loadingSpinner.style.display = 'none';
+                    
+                    // Show detailed error message
+                    let errorMessage = error.message || 'Prediction failed. ';
+                    
+                    if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+                        errorMessage = 'Cannot connect to the prediction server. Please ensure the Flask backend is running on http://127.0.0.1:5000';
+                    } else if (errorMessage.includes('timeout')) {
+                        errorMessage = 'Server request timeout. The prediction server might be busy or not responding.';
+                    }
+                    
+                    showToast(errorMessage, 'error');
+                    
+                    // Show connection instructions
+                    setTimeout(() => {
+                        showToast('Please start your Flask server: python app.py', 'info');
+                    }, 2000);
                     
                 } finally {
                     // Hide loading spinner
@@ -3459,48 +3453,6 @@
                 logDebug('API call failed:', error.message);
                 throw error;
             }
-        }
-
-        async function simulatePrediction(formData) {
-            logDebug('Simulating prediction with data:', formData);
-            
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            // Generate prediction based on elevation (demo logic)
-            const elevation = formData.Elevation;
-            let predictedClass;
-            
-            if (elevation > 3300) predictedClass = 7;
-            else if (elevation > 3000) predictedClass = 1;
-            else if (elevation > 2700) predictedClass = 2;
-            else if (elevation > 2500) predictedClass = 5;
-            else if (elevation > 2300) predictedClass = 6;
-            else if (elevation > 2100) predictedClass = 3;
-            else predictedClass = 4;
-            
-            // Get forest name
-            const forestNames = {
-                1: "Spruce/Fir",
-                2: "Lodgepole Pine",
-                3: "Ponderosa Pine",
-                4: "Cottonwood/Willow",
-                5: "Aspen",
-                6: "Douglas-fir",
-                7: "Krummholz"
-            };
-            
-            // Simulate confidence (90-97%)
-            const confidence = 90 + Math.floor(Math.random() * 8);
-            
-            const result = {
-                forest_name: forestNames[predictedClass],
-                predicted_class: predictedClass,
-                confidence: confidence
-            };
-            
-            displayPredictionResult(result);
-            showToast(`Demo prediction: ${result.forest_name} (Backend not connected)`, 'info');
         }
 
         // ==================== DISPLAY RESULTS ====================
@@ -3690,6 +3642,8 @@
                 return "1. Go to Prediction page\n2. Adjust parameters using sliders\n3. Select soil types\n4. Click Predict\n5. View results with explanations\nUse 'Take Tour' button for detailed guidance.";
             } else if (lowerMessage.includes('backend') || lowerMessage.includes('api')) {
                 return "The backend is a Flask API at http://127.0.0.1:5000/predict that accepts JSON POST requests with environmental parameters.";
+            } else if (lowerMessage.includes('error') || lowerMessage.includes('not working')) {
+                return "If predictions aren't working, ensure your Flask backend is running. Start it with: python app.py (make sure it's running on http://127.0.0.1:5000)";
             } else {
                 return "I'm here to help with questions about forest cover types, the prediction model, or using the system. Try asking about accuracy, forest types, or how to make predictions.";
             }
