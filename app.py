@@ -3,7 +3,7 @@ from flask_cors import CORS
 import joblib
 import pandas as pd
 import os
-import urllib.request
+import requests
 
 app = Flask(__name__)
 CORS(app)  # Allow frontend requests
@@ -14,13 +14,16 @@ CORS(app)  # Allow frontend requests
 
 MODEL_PATH = "forest_model_imp.pkl"
 
-MODEL_URL = "https://github.com/12306444/Forest-Cover-Prediction/releases/download/v1.0/forest_model_imp.pkl"
+# Your Google Drive direct download link
+MODEL_URL = "https://drive.google.com/uc?export=download&id=1D3dZRk8G0VLF9HADKXPMMq4c2OnKVi4Q"
 
 # Auto-download model on Render if missing
 if not os.path.exists(MODEL_PATH):
-    print("⚠ Model not found — downloading from GitHub Releases...")
+    print("⚠ Model not found — downloading from Google Drive...")
     try:
-        urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
+        response = requests.get(MODEL_URL)
+        with open(MODEL_PATH, "wb") as f:
+            f.write(response.content)
         print("✅ Model downloaded successfully.")
     except Exception as e:
         print("❌ Failed to download model:", e)
@@ -66,7 +69,7 @@ def home():
 
 
 # ------------------------------
-# Predict Route (Frontend integration SAME)
+# Predict Route
 # ------------------------------
 @app.route("/predict", methods=["POST"])
 def predict():
